@@ -1,0 +1,124 @@
+-------------------------------------------------------------------------------
+--                          A d a   W i d g e t s                            --
+--                                                                           --
+--                     Copyright (C) 2026 Juan L. Freniche                   --
+--                                                                           --
+--  This program is free software;  you can redistribute it and-or modify it --
+--  under terms of the  GNU General Public License  : published by the Free  --
+--  Software  Foundation;  either version 3,  or (at your  option) any later --
+--  version. It is is distributed in the hope that it will be useful,        --
+--  but WITHOUT ANY WARRANTY;  without even the implied warranty of MERCHAN- --
+--  TABILITY or FITNESS FOR A PARTICULAR PURPOSE.                            --
+--                                                                           --
+--  You should have received a copy of the GNU General Public License along  --
+--  with this program; see the file COPYING3.                                --
+--  If not, see <http:--www.gnu.org-licenses->.                              --
+-------------------------------------------------------------------------------
+--  with Gtk.Widget;
+--  
+--  package body Gtk_Additions is
+   --  
+   --------------------------------------------
+   --  INTERNAL INITIALIZE ADA CLASS RECORD  --
+   --------------------------------------------
+   --  function Internal
+   --    (Ancestor       : GType;
+   --     NSignals       : Gint;
+   --     Signals        : System.Address;
+   --     Parameters     : System.Address;
+   --     Max_Parameters : Gint;
+   --     Returns        : System.Address;
+   --     Max_Returns    : Gint;
+   --     Instance_Init  : GInstanceInitFunc;
+   --     Class_Record   : not null access Ada_GObject_Class_Record;
+   --     Type_Name      : String) return Integer;
+   --  pragma Import (C, Internal, "ada_initialize_class_record_replacement");
+
+   -------------------------------
+   --  ADA INITIALIZE CLASS RECORD  --
+   -------------------------------
+   --  procedure Ada_Initialize_Class_Record
+   --    (Ancestor      : GType;
+   --     Class_Record  : in out Ada_GObject_Class;
+   --     Type_Name     : String;
+   --     Signals       : Interfaces.C.Strings.chars_ptr_array := No_Signals;
+   --     Parameters    : Signal_Parameter_Types := Null_Parameter_Types;
+   --     Returns       : Signal_Return_Types := No_Return_Types;
+   --     Instance_Init : GInstanceInitFunc := null;
+   --     Class_Init    : Ada_Class_Init := null;
+   --     Created       : out Boolean);
+   --  procedure Ada_Initialize_Class_Record
+   --    (Ancestor      : GType;
+   --     Class_Record  : in out Ada_GObject_Class;
+   --     Type_Name     : String;
+   --     Signals       : Interfaces.C.Strings.chars_ptr_array := No_Signals;
+   --     Parameters    : Signal_Parameter_Types := Null_Parameter_Types;
+   --     Returns       : Signal_Return_Types := No_Return_Types;
+   --     Instance_Init : GInstanceInitFunc := null;
+   --     Class_Init    : Ada_Class_Init := null;
+   --     Created       : out Boolean)
+   --  is
+   --     Default_Params : Signal_Parameter_Types (1 .. Signals'Length, 1 .. 0) :=
+   --       (others => (others => GType_None));
+   --     Pa  : System.Address := Default_Params'Address;
+   --     Num : Gint := 0;
+   --
+   --  begin
+   --     if Class_Record = null then
+   --        Class_Record := new Ada_GObject_Class_Record;
+   --        Class_Record.The_Type := 0;
+   --        Class_Record.Class_Init := null;
+   --     end if;
+   --
+   --     Class_Record.Class_Init := Class_Init;
+   --
+   --     if Parameters /= Null_Parameter_Types then
+   --        pragma Assert (Parameters'Length (1) = Signals'Length);
+   --        Pa := Parameters'Address;
+   --        Num := Parameters'Length (2);
+   --     end if;
+   --
+   --     Created := Internal
+   --       (Ancestor       => Ancestor,
+   --        NSignals       => Signals'Length,
+   --        Signals        => Signals'Address,
+   --        Parameters     => Pa,
+   --        Max_Parameters => Num,
+   --        Returns        => Returns'Address,
+   --        Max_Returns    => Returns'Length,
+   --        Instance_Init  => Instance_Init,
+   --        Class_Record   => Class_Record,
+   --        Type_Name      => Type_Name & ASCII.NUL) /= 0;
+   --
+   --  end Ada_Initialize_Class_Record;
+
+   -------------------------------
+   --  INITIALIZE CLASS RECORD  --
+   -------------------------------
+   --  function Initialize_Class_Record
+   --    (Ancestor      : GType;
+   --     Class_Record  : not null access Ada_GObject_Class;
+   --     Type_Name     : String;
+   --     Signals       : Interfaces.C.Strings.chars_ptr_array := No_Signals;
+   --     Parameters    : Signal_Parameter_Types := Null_Parameter_Types;
+   --     Returns       : Signal_Return_Types := No_Return_Types;
+   --     Instance_Init : GInstanceInitFunc := null;
+   --     Class_Init    : Ada_Class_Init := null)
+   --     return Boolean
+   --  is
+   --     Created : Boolean;
+   --  begin
+   --     Ada_Initialize_Class_Record
+   --       (Ancestor      => Ancestor,
+   --        Class_Record  => Class_Record.all,
+   --        Type_Name     => Type_Name,
+   --        Signals       => Signals,
+   --        Parameters    => Parameters,
+   --        Returns       => Returns,
+   --        Instance_Init => Instance_Init,
+   --        Class_Init    => Class_Init,
+   --        Created       => Created);
+   --     return Created;
+   --  end Initialize_Class_Record;
+
+--  end Gtk_Additions;

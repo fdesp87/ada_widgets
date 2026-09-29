@@ -1,0 +1,75 @@
+-------------------------------------------------------------------------------
+--                          A d a   W i d g e t s                            --
+--                                                                           --
+--                     Copyright (C) 2026 Juan L. Freniche                   --
+--                                                                           --
+--  This program is free software;  you can redistribute it and-or modify it --
+--  under terms of the  GNU General Public License  : published by the Free  --
+--  Software  Foundation;  either version 3,  or (at your  option) any later --
+--  version. It is is distributed in the hope that it will be useful,        --
+--  but WITHOUT ANY WARRANTY;  without even the implied warranty of MERCHAN- --
+--  TABILITY or FITNESS FOR A PARTICULAR PURPOSE.                            --
+--                                                                           --
+--  You should have received a copy of the GNU General Public License along  --
+--  with this program; see the file COPYING3.                                --
+--  If not, see <http:--www.gnu.org-licenses->.                              --
+-------------------------------------------------------------------------------
+library project Ada_Widgets is
+
+   type Build_Type is ("Debug", "Optimize");
+   Build : Build_Type := external ("BUILD", "Debug");
+
+   for Languages use ("C");
+   for Source_Dirs use (".");
+   for Object_Dir use "obj";
+   for Library_Dir use "lib";
+
+   for Library_Name use "ada_widgets";
+   for Library_Kind use "relocatable";
+   for Library_Options use (
+      "-lgladeui-2",
+      "-lgtk-3",
+      "-lgobject-2.0",
+      "-lglib-2.0",
+      "-Wl,--export-dynamic"
+   );
+
+   -- Common system include directories treated as system headers (-isystem)
+   -- to avoid third-party header warnings from Glade and GTK headers.
+   System_Includes := ("-I.",
+      "-I/opt/GNAT/15.1.0-2/lib/gcc/x86_64-pc-linux-gnu/15.1.0/include/",
+      "-isystem/usr/include/gtk-3.0",
+      "-isystem/usr/include/glib-2.0",
+      "-isystem/usr/lib/x86_64-linux-gnu/glib-2.0/include",
+      "-isystem/usr/include/pango-1.0",
+      "-isystem/usr/include/harfbuzz",
+      "-isystem/usr/include/atk-1.0",
+      "-isystem/usr/include/cairo",
+      "-isystem/usr/include/gdk-pixbuf-2.0",
+      "-isystem/usr/include/gio-unix-2.0",
+      "-isystem/usr/include/freetype2",
+      "-isystem/usr/include/libpng16",
+      "-isystem/usr/include/libmount",
+      "-isystem/usr/include/blkid",
+      "-isystem/usr/include/fribidi",
+      "-isystem/usr/include/pixman-1",
+      "-isystem/usr/include/x86_64-linux-gnu",
+      "-isystem/usr/include/webp",
+      "-isystem/usr/include/at-spi2-atk/2.0",
+      "-isystem/usr/include/at-spi-2.0",
+      "-isystem/usr/include/dbus-1.0",
+      "-isystem/usr/lib/x86_64-linux-gnu/dbus-1.0/include",
+      "-isystem/usr/include/libgladeui-2.0",
+      "-pthread"
+   );
+
+   package Compiler is
+      case Build is
+         when "Debug" =>
+            for Switches ("C") use ("-g", "-O0", "-fPIC") & System_Includes;
+         when "Optimize" =>
+            for Switches ("C") use ("-O2", "-fPIC") & System_Includes;
+      end case;
+   end Compiler;
+
+end Ada_Widgets;

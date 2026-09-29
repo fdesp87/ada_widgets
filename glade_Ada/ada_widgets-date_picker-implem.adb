@@ -1,0 +1,481 @@
+-------------------------------------------------------------------------------
+--                          A d a   W i d g e t s                            --
+--                                                                           --
+--                     Copyright (C) 2026 Juan L. Freniche                   --
+--                                                                           --
+--  This program is free software;  you can redistribute it and-or modify it --
+--  under terms of the  GNU General Public License and/or the GNU Lesser     --
+--  General Public License, published by the Free Software  Foundation;      --
+--  either versions 3,  or (at your  option) any later version.              --
+--  It is is distributed in the hope that it will be useful, but             --
+--  WITHOUT ANY WARRANTY;  without even the implied warranty of MERCHAN-     --
+--  TABILITY or FITNESS FOR A PARTICULAR PURPOSE.                            --
+--                                                                           --
+--  You should have received a copy of the GNU General Public License and of --
+--  the GNU Lesser General Public License along with this program; see files --
+--  LICENSE.GLP and LICENSE.LGPL. If not, see <http:--www.gnu.org-licenses-> --                              --
+-------------------------------------------------------------------------------
+with System;
+with Interfaces.C;
+with Interfaces.C.Strings;
+
+with Gtk.Enums;
+with Gtk.Image;
+with Gtk_Additions;            use Gtk_Additions;
+with Gtk.Container;            use Gtk.Container;
+with Gtk.Box;                  use Gtk.Box;
+with Gtk.GEntry;               use Gtk.GEntry;
+with Gtk.Button;               use Gtk.Button;
+with Gtk.Widget;               use Gtk.Widget;
+with Gtk.Css_Provider;         use Gtk.Css_Provider;
+with Gtk.Style_Provider;       use Gtk.Style_Provider;
+with Gtk.Style_Context;
+with Gdk.Screen;
+with Glib.Error;
+with Gtk.Handlers;
+with Gtkada.Dialogs;           use Gtkada.Dialogs;
+with Glib.Type_Conversion_Hooks;
+with Glade_Binding;            use Glade_Binding;
+with Ada_Widgets.Date_Picker.Validation;
+
+package body Ada_Widgets.Date_Picker.Implem is
+
+   package IC  renames Interfaces.C;
+   package ICS renames Interfaces.C.Strings;
+
+   package Picker_Handlers is new Gtk.Handlers.User_Callback
+     (Gtk.Button.Gtk_Button_Record, GObject);
+
+   -------------------------------------------
+   --  BUTTON AND ENTRY USER DATA           --
+   -------------------------------------------
+   package Button_User_Data is new Glib.Object.User_Data (Gtk_Button);
+   package Entry_User_Data  is new Glib.Object.User_Data (Gtk_Entry);
+
+   -------------------------------------------
+   --  DATE USER DATA                       --
+   -------------------------------------------
+   subtype TDate is String (1 .. 10);
+   package Date_User_Data is new Glib.Object.User_Data (Data_Type => TDate);
+
+   -------------------------------------------
+   --  SET PROPERTY                         --
+   -------------------------------------------
+   procedure Set_Property (Object        : access Glib.Object.GObject_Record'Class;
+                           Prop_Id       : Property_Id;
+                           Value         : Glib.Values.GValue;
+                           Property_Spec : Param_Spec) is
+      pragma Unreferenced (Property_Spec);
+
+   begin
+      case Prop_Id is
+         when PROP_MIN_DATE =>
+            declare
+               Str : constant String := Glib.Values.Get_String (Value);
+            begin
+               Ada_Log ("ada_widgets.date_picker.implem.set_property: "
+                        & "prop_id=" & Prop_Id'Image
+                        & ", value=""" & Str & """");
+
+               if Ada_Widgets.Date_Picker.Validation.Is_Valid_Format (Str) then
+                  Date_User_Data.Set (Object => Object,
+                                      Data   => Str,
+                                      Id     => "ada-picker-min-date");
+               else
+                  Date_User_Data.Set (Object => Object,
+                                      Data   => "1901-01-01",
+                                      Id     => "ada-picker-min-date");
+               end if;
+            end;
+
+         when PROP_MAX_DATE =>
+            declare
+               Str : constant String := Glib.Values.Get_String (Value);
+            begin
+               Ada_Log ("ada_widgets.date_picker.implem.set_property: "
+                        & "prop_id=" & Prop_Id'Image
+                        & ", value=""" & Str & """");
+
+               if Ada_Widgets.Date_Picker.Validation.Is_Valid_Format (Str) then
+                  Date_User_Data.Set (Object => Object,
+                                      Data   => Str,
+                                      Id     => "ada-picker-max-date");
+               else
+                  Date_User_Data.Set (Object => Object,
+                                      Data   => "2399-12-31",
+                                      Id     => "ada-picker-max-date");
+               end if;
+            end;
+
+         when others =>
+               null;
+      end case;
+
+   end Set_Property;
+
+   -------------------------------------------
+   --  GET PROPERTY                         --
+   -------------------------------------------
+   procedure Get_Property (Object        : access Glib.Object.GObject_Record'Class;
+                           Prop_Id       : Property_Id;
+                           Value         : out Glib.Values.GValue;
+                           Property_Spec : Param_Spec) is
+      pragma Unreferenced (Property_Spec);
+
+   begin
+      case Prop_Id is
+         when PROP_MIN_DATE =>
+            declare
+               Str : constant String :=
+                       Date_User_Data.Get (Object  => Object,
+                                           Id      => "ada-picker-min-date",
+                                           Default => "1901-01-01");
+            begin
+               Ada_Log ("ada_widgets.date_picker.implem.get_property: "
+                        & "prop_id=" & Prop_Id'Image
+                        & ", value=""" & Str & """");
+
+               Glib.Values.Set_String (Value, Str);
+            end;
+
+         when PROP_MAX_DATE =>
+            declare
+               Str : constant String :=
+                       Date_User_Data.Get (Object  => Object,
+                                           Id      => "ada-picker-max-date",
+                                           Default => "2300-12-31");
+            begin
+               Ada_Log ("ada_widgets.date_picker.implem.get_property: "
+                        & "prop_id=" & Prop_Id'Image
+                        & ", value=""" & Str & """");
+
+               Glib.Values.Set_String (Value, Str);
+            end;
+         when others =>
+            null;
+      end case;
+   end Get_Property;
+
+   -----------------------------------------------------------------------------
+   package Type_Conversion_Ada_Date_Picker is
+     new Glib.Type_Conversion_Hooks.Hook_Registrator
+       (Ada_Widgets.Date_Picker.Implem.Get_Type'Access, Ada_Date_Picker_Record);
+   pragma Unreferenced (Type_Conversion_Ada_Date_Picker);
+
+   -------------------------------------------
+   --  LOAD DATE CSS                        --
+   -------------------------------------------
+   Css_Date_Loaded : Boolean := False;
+
+   procedure Load_Date_CSS;
+   procedure Load_Date_CSS is
+      DatePicker_CSS : constant String :=
+                         "box#Date_Picker_HBox {"
+                         & "    border-style: none;"
+                         & "    background-color: transparent;"
+                         & "}"
+                         & "entry#Date_Picker_Year_Entry,"
+                         & "entry#Date_Picker_Month_Entry,"
+                         & "entry#Date_Picker_Day_Entry {"
+                         & "    padding-top: 2px;"
+                         & "    padding-bottom: 2px;"
+                         & "    min-height: 22px;"
+                         & "    border-radius: 0px;"
+                         & "    margin-right: -1px;"
+                         & "}"
+                         & "button#Date_Picker_Button {"
+                         & "    padding-top: 0px;"
+                         & "    padding-bottom: 0px;"
+                         & "    min-height: 22px;"
+                         & "    border-radius: 0px;"
+                         & "}";
+
+      Provider : Gtk_Css_Provider;
+      Error    : aliased Glib.Error.GError;
+      Success  : Boolean;
+   begin
+      if Css_Date_Loaded then
+         return;
+      end if;
+
+      Ada_Log ("ada_widgets.date_picker.implem.load_date_css");
+
+      Gtk_New (Provider);
+
+      Success := Provider.Load_From_Data (DatePicker_CSS, Error'Access);
+      if not Success then
+         Ada_Log ("ada_widgets.date_picker.implem.load_date_css: error"
+                  & Error.Get_Message);
+         Glib.Error.Error_Free (Error);
+         Unref (Provider);
+         return;
+      end if;
+
+      Gtk.Style_Context.Add_Provider_For_Screen
+        (Screen   => Gdk.Screen.Get_Default,
+         Provider => +Provider,
+         Priority => Gtk.Style_Provider.Priority_Application);
+
+      Unref (Provider);
+      Css_Date_Loaded := True;
+   end Load_Date_CSS;
+
+   -----------------------------------------------------------------------------
+   --  Klass : aliased Glib.Object.Ada_GObject_Class := Glib.Object.Uninitialized_Class;
+   Klass : Glib.GType := Glib.GType_None;
+
+   procedure Class_Init (Self : GObject_Class);
+   pragma Convention (C, Class_Init);
+
+   procedure Class_Init (Self : GObject_Class) is
+      Class_Ptr : constant GObject_Class_Block_Ptr := Convert (Self);
+   begin
+      Ada_Log ("ada_widgets.date_picker.implem.class_init: "
+               & "klass=" & Type_Name (Klass)
+               & " (" & To_Hex (Self'Image) & ")");
+
+      Class_Ptr.Set_Property := Set_Property'Access;
+      Class_Ptr.Get_Property := Get_Property'Access;
+
+      Install_Property
+        (Class_Record  => Self,
+         Prop_Id       => PROP_MIN_DATE,
+         Property_Spec => Gnew_String
+             (Name    => "min-date",
+              Nick    => "Min Date",
+              Blurb   => "Minimum allowed date",
+              Default => "1901-01-01",
+              Flags   => Param_Readable or Param_Writable));
+
+      Install_Property
+        (Class_Record  => Self,
+         Prop_Id       => PROP_MAX_DATE,
+         Property_Spec => Gnew_String
+           (Name    => "max-date",
+            Nick    => "Max Date",
+            Blurb   => "Maximum allowed date",
+            Default => "2399-12-31",
+            Flags   => Param_Readable or Param_Writable));
+
+   end Class_Init;
+
+   -----------------------------------------------------------------------------
+   procedure Date_Picker_Init (Object : GObject_Ptr;
+                               GClass : GObject_Class);
+   pragma Convention (C, Date_Picker_Init);
+   procedure Date_Picker_Init (Object : GObject_Ptr;
+                               GClass : GObject_Class) is
+      Stub : GObject_Record;
+   begin
+      Ada_Log ("ada_widgets.date_picker.implem.date_picker_init: " & ASCII.LF
+               & Blanks & "object=" & Type_Name (Get_Type (Get_User_Data (-Object, Stub)))
+               & "(" & To_Hex (Object'Image) & ")" & ASCII.LF
+               & Blanks & "klass=" & To_Hex (GClass'Image));
+
+      Build (Object => Get_User_Data (-Object, Stub),
+             Show   => True);
+   end Date_Picker_Init;
+
+   -------------------------------------------
+   --  GET TYPE                             --
+   -------------------------------------------
+   function Get_Type return Glib.GType is
+      Parent_Query : aliased GType_Query;
+      Type_Info    : aliased GType_Info;
+      Text         : ICS.chars_ptr;
+   begin
+
+      if Klass = Glib.GType_None then
+         G_Type_Query (Gtk.Frame.Get_Type, Parent_Query'Access);
+         Type_Info :=
+           (Class_Size      => IC.unsigned_short (Parent_Query.Class_Size),
+            --  Filler1         => (others => 0),
+            Base_Init       => null,
+            Base_Finalize   => null,
+            Class_Init      => Class_Init'Access,
+            Class_Finalize  => null,
+            Class_Data      => System.Null_Address,
+            Instance_Size   => IC.unsigned_short (Parent_Query.Instance_Size),
+            N_Preallocs     => 0,
+            Instance_Init   => Date_Picker_Init'Access,
+            Value_Table     => System.Null_Address);
+
+         Text := ICS.New_String ("AdaDatePicker");
+
+         Klass :=
+           G_Type_Register_Static
+             (Parent_Type => Gtk.Frame.Get_Type,
+              Type_Name   => Text,
+              Info        => Type_Info'Access,
+              Flags       => 0);
+
+         IC.Strings.Free (Text);
+
+         Ada_Log ("ada_widgets.date_picker.implem.get_type: "
+                  & "type=" & Type_Name (Klass)
+                  & " (" & To_Hex (Glib.GType'Image (Klass)) & ")");
+      end if;
+
+      return Klass;
+   end Get_Type;
+
+   -----------------------------------------------------------------------------
+   procedure On_Calendar_Button_Clicked
+     (Some_Button : access Gtk.Button.Gtk_Button_Record'Class;
+      User_Data   : GObject);
+   procedure On_Calendar_Button_Clicked
+     (Some_Button : access Gtk.Button.Gtk_Button_Record'Class;
+      User_Data   : GObject)
+   is
+      pragma Unreferenced (Some_Button, User_Data);
+      Response : Message_Dialog_Buttons;
+   begin
+      Response := Message_Dialog
+        (Msg            =>
+           "Calendar Selector Info" & ASCII.LF & ASCII.LF
+           & "The calendar selector will be available for the application.",
+         Dialog_Type    => Information,
+         Buttons        => Button_OK,
+         Title          => "AdaDatePicker");
+
+   end On_Calendar_Button_Clicked;
+
+   -------------------------------------------
+   --  BUILD                                --
+   -------------------------------------------
+   procedure Build (Object : not null access Glib.Object.GObject_Record'Class;
+                    Show   : Boolean) is
+      Cal_Icon     : Gtk.Image.Gtk_Image;
+      Context      : Gtk.Style_Context.Gtk_Style_Context;
+      Widget       : Gtk_Frame;
+      HBox         : Gtk_Box;
+      Year_Entry   : Gtk_Entry;
+      Month_Entry  : Gtk_Entry;
+      Day_Entry    : Gtk_Entry;
+      The_Button   : Gtk_Button;
+      Child        : Gtk_Widget;
+   begin
+      Ada_Log ("ada_widgets.date_picker.implem.build: " & ASCII.LF
+               & Blanks & "object=" & Type_Name (Get_Type (Object))
+               & " (" & To_Hex (Glib.Object.Get_Object (Object)'Image) & ")");
+
+      --  1. Convert the Fake object to a Gtk Frame
+      Widget := Gtk_Frame (Object);
+
+      --  2. Initialize the widget Gtk_Frame
+      Widget.Set_Shadow_Type (Gtk.Enums.Shadow_None);
+      Widget.Set_Name ("Date_Picker_Frame");
+      Widget.Set_Label ("");
+
+      --  3. See there is a child box, otherwise create one
+      Child := Widget.Get_Child;
+      if Child /= null and then Child.all in Gtk_Box_Record'Class then
+         HBox := Gtk_Box (Child);
+      else
+         if Child /= null then
+            Gtk_Container (Object).Remove (Child);
+         end if;
+         Gtk.Box.Gtk_New (HBox, Gtk.Enums.Orientation_Horizontal, 0);
+         HBox.Set_Name ("Date_Picker_HBox");
+         Widget.Add (HBox);
+      end if;
+
+      --  4. Set the hbox style
+      Context := Gtk.Style_Context.Get_Style_Context (HBox);
+      Context.Add_Class ("linked");
+
+      --  5. if hbox had children, show and return
+      if Has_Children (Gtk_Container (HBox)) then
+        if Show then
+            Widget.Show_All;
+         end if;
+         return;
+      end if;
+
+      --  6. Create and configure year entry
+      Gtk.GEntry.Gtk_New (Year_Entry);
+      Year_Entry.Set_Name ("Date_Picker_Year_Entry");
+      Year_Entry.Set_Placeholder_Text ("YYYY");
+      Year_Entry.Set_Width_Chars (5);
+      Year_Entry.Set_Max_Length (4);
+      Year_Entry.Set_Alignment (0.5);
+      Year_Entry.Set_Overwrite_Mode (True);
+      HBox.Pack_Start (Child   => Year_Entry,
+                       Expand  => False,
+                       Fill    => False,
+                       Padding => 0);
+
+      --  7. Create and configure month entry
+      Gtk.GEntry.Gtk_New (Month_Entry);
+      Month_Entry.Set_Name ("Date_Picker_Month_Entry");
+      Month_Entry.Set_Placeholder_Text ("MM");
+      Month_Entry.Set_Width_Chars (4);
+      Month_Entry.Set_Max_Length (2);
+      Month_Entry.Set_Alignment (0.5);
+      Month_Entry.Set_Overwrite_Mode (True);
+      HBox.Pack_Start (Child   => Month_Entry,
+                       Expand  => False,
+                       Fill    => False,
+                       Padding => 0);
+
+      --  8. Create and configure day entry
+      Gtk.GEntry.Gtk_New (Day_Entry);
+      Day_Entry.Set_Name ("Date_Picker_Day_Entry");
+      Day_Entry.Set_Placeholder_Text ("DD");
+      Day_Entry.Set_Width_Chars (4);
+      Day_Entry.Set_Max_Length (2);
+      Day_Entry.Set_Alignment (0.5);
+      Day_Entry.Set_Overwrite_Mode (True);
+      HBox.Pack_Start (Child   => Day_Entry,
+                       Expand  => False,
+                       Fill    => False,
+                       Padding => 0);
+
+      --  9. Create the button and assign the icon and the button
+      Gtk.Button.Gtk_New (The_Button);
+      The_Button.Set_Name ("Date_Picker_Button");
+      Gtk.Image.Gtk_New_From_Icon_Name (Cal_Icon,
+                                        "x-office-calendar",
+                                        Gtk.Enums.Icon_Size_Button);
+      The_Button.Set_Image (Cal_Icon);
+      HBox.Pack_Start (Child   => The_Button,
+                       Expand  => False,
+                       Fill    => False,
+                       Padding => 0);
+
+      --  10. Connect the signal to the button
+      Picker_Handlers.Connect
+        (The_Button,
+         "clicked",
+         Picker_Handlers.To_Marshaller (On_Calendar_Button_Clicked'Access),
+         GObject (Object));
+
+      --  11. Set data
+      Button_User_Data.Set (Object, The_Button,  "ada-picker-button-ref");
+      Entry_User_Data.Set  (Object, Year_Entry,  "ada-picker-year-ref");
+      Entry_User_Data.Set  (Object, Month_Entry, "ada-picker-month-ref");
+      Entry_User_Data.Set  (Object, Day_Entry,   "ada-picker-day-ref");
+
+      --  12. Change sensitiveness
+      Year_Entry.Set_Sensitive (False);
+      Month_Entry.Set_Sensitive (False);
+      Day_Entry.Set_Sensitive (False);
+
+      --  13. Load the CSS for the widget. It is idempotent
+      Load_Date_CSS;
+
+      --  14. Nothing
+
+      --  15. Nothing
+
+      --  16. Nothing
+
+      --  17. Nothing
+
+      --  18. Show all
+      if Show then
+         Widget.Show_All;
+      end if;
+   end Build;
+
+end Ada_Widgets.Date_Picker.Implem;

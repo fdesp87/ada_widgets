@@ -1,0 +1,161 @@
+-------------------------------------------------------------------------------
+--                          A d a   W i d g e t s                            --
+--                                                                           --
+--                     Copyright (C) 2026 Juan L. Freniche                   --
+--                                                                           --
+--  This program is free software;  you can redistribute it and-or modify it --
+--  under terms of the  GNU General Public License and/or the GNU Lesser     --
+--  General Public License, published by the Free Software  Foundation;      --
+--  either versions 3,  or (at your  option) any later version.              --
+--  It is is distributed in the hope that it will be useful, but             --
+--  WITHOUT ANY WARRANTY;  without even the implied warranty of MERCHAN-     --
+--  TABILITY or FITNESS FOR A PARTICULAR PURPOSE.                            --
+--                                                                           --
+--  You should have received a copy of the GNU General Public License and of --
+--  the GNU Lesser General Public License along with this program; see files --
+--  LICENSE.GLP and LICENSE.LGPL. If not, see <http:--www.gnu.org-licenses-> --                              --
+-------------------------------------------------------------------------------
+with "gtkada";
+
+library project Ada_Widgets is
+   Version := "1.0";
+
+   type Build_Mode is ("debug", "optimize", "extra_debug");
+   Build : Build_Mode := external ("ADA_WIDGETS_BUILD", "optimize");
+
+   type LIBRARY_TYPE is ("relocatable", "static", "static-pic");
+   LIB_BUILD : LIBRARY_TYPE := external("GTKADA_BUILD",
+                                        external("LIBRARY_TYPE", "relocatable"));
+
+   case LIB_BUILD is
+      when "relocatable" =>
+         for Library_Kind use "relocatable";
+         for Library_Version use "ada_widgets.so." & Version;
+         for Object_Dir use "obj/relocatable";
+         for Library_ALI_Dir use "ali/relocatable";
+         for Library_Name use "ada_widgets";
+      when "static-pic" =>
+         for Library_Kind use "static-pic";
+         for Object_Dir use "obj/static-pic";
+         for Library_ALI_Dir use "ali/static-pic";
+         for Library_Version use "libada_widgets_pic.a";
+         for Library_Name use "ada_widgets_pic";
+      when "static" =>
+         for Library_Kind use "static";
+         for Object_Dir use "obj/static";
+         for Library_ALI_Dir use "ali/static";
+         for Library_Version use "libada_widgets.a";
+         for Library_Name use "ada_widgets";
+   end case;
+   for Source_Dirs use ("./");
+   for Library_Dir use "./lib";
+
+   for Source_Files use
+       (  "gtk_ada_date_picker.ads",
+          "gtk_ada_date_picker.adb",
+          "gtk_ada_time_picker.ads",
+          "gtk_ada_time_picker.adb"
+       );
+
+   package Compiler is
+      defaults := (
+           "-ffunction-sections",  -- function sections separated
+           "-fdata-sections",      -- data sections separated
+           "-gnat2022",      --  Ada 2022
+           "-gnatX",         --  GNAT extensions
+           "-gnatQ"          --  generate ALI even if illegalities
+                  );
+      warnings := (
+--         "-gnatwe",  --  warnings and style checks are errors
+           "-gnatwa",  --  all optional warnings
+           "-gnatwC",  --  Suppress warnings on conditionals
+           "-gnatwJ",  --  Disable warnings on obsolescent features
+           "-gnatwM"   --  Disable warnings on modified but unreferenced variables
+                   );
+      style := (
+           "-gnaty",         --  enable built-in style checks
+           "-gnaty3",        --  Identation level
+           "-gnatya",        --  Check attribute casing
+           "-gnatyb",        --  Blanks not allowed at statement end
+           "-gnatyc",        --  Check comments, double space
+           "-gnatye",        --  Check end/exit labels
+           "-gnatyf",        --  No form feeds or vertical tabs
+           "-gnatyh",        --  No horizontal tabs
+           "-gnatyi",        --  Check if-then layout
+           "-gnatyk",        --  Check keyword casing
+           "-gnatyl",        --  Check layout
+           "-gnatyM120",     --  Set maximum line length
+           "-gnatyn",        --  Check casing of entities in Standard
+           "-gnatyp",        --  Check pragma casing
+           "-gnatyr",        --  Check references
+           "-gnatys",        --  Check separate specs
+           "-gnatyS",        --  Check no statements after then/else
+           "-gnatyt"         --  Check token spacing
+               );
+      case Build is
+         when "debug" =>
+            for Default_Switches ("Ada") use defaults & warnings & style
+             & (
+           "-g",             --  debug
+           "-O0",            --  optimization level 0
+           "-fstack-check",  --  stack check
+           "-gnata",         --  enable assettions
+           "-gnateE"         --  generate extra info in exception msgs
+               );
+         when "extra_debug" =>
+            for Default_Switches ("Ada") use defaults & warnings & style
+             & (
+           "-v",             --  verbose
+           "-g",             --  debug
+           "-O0",            --  optimization level 0
+           "-fstack-check",  --  stack check
+           "-gnata",         --  enable assettions
+           "-gnateE"         --  generate extra info in exception msgs
+               );
+         when "optimize" =>
+            for Default_Switches ("Ada") use defaults & warnings
+             & (
+            "-O2",           --  optimize level 2
+            "-gnatn",        --  inline level 1
+            "-gnatp",        --  suppress all checks
+            "-gnateE"        --  generate extra info in exception msgs
+               );
+      end case;
+   end Compiler;
+
+   package Binder is
+      for Default_Switches ("ada") use
+            ("-E",      -- tracebacks on exceptions
+             "-r",      -- list pragmas restrictions that could be applied
+             "-s",      -- all sources shall be present
+             "-shared", -- link against shared RTS
+             "-Sin");   -- uninitialized scalars to invalid values
+   end Binder;
+
+   package Builder is
+     for Default_Switches ("Ada") use
+            ("-s",      -- recompile if switches changed
+             "-k",      -- keep going
+             "-x",      -- sources that are not part of any Project File may be compiled
+             "-m",      -- minimal recompilations
+             "-vl",     -- verbose level low
+             "-j3");    -- use number or processors for simultaneous compilation
+   end Builder;
+
+   package Install is
+      case LIB_BUILD is
+         when "relocatable" =>
+            for Sources_Subdir use "include/ada_widgets/";
+            for ALI_Subdir use      "lib/ada_widgets.relocatable/";
+            for LIB_Subdir use      "lib/ada_widgets.relocatable/";
+         when "static-pic" =>
+            for Sources_Subdir use "include/ada_widgets/";
+            for ALI_Subdir use     "lib/ada_widgets.static-pic/";
+            for LIB_Subdir use     "lib/ada_widgets.static-pic/";
+         when "static" =>
+            for Sources_Subdir use "include/ada_widgets/";
+            for ALI_Subdir use     "lib/ada_widgets.static";
+            for LIB_Subdir use     "lib/ada_widgets.static";
+      end case;
+   end Install;
+end Ada_Widgets;

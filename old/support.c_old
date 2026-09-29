@@ -1,0 +1,189 @@
+/*-----------------------------------------------------------------------------
+--                          A d a   W i d g e t s                            --
+--                                                                           --
+--                     Copyright (C) 2026 Juan L. Freniche                   --
+--                                                                           --
+--  This program is free software;  you can redistribute it and-or modify it --
+--  under terms of the  GNU General Public License and/or the GNU Lesser     --
+--  General Public License, published by the Free Software  Foundation;      --
+--  either versions 3,  or (at your  option) any later version.              --
+--  It is is distributed in the hope that it will be useful, but             --
+--  WITHOUT ANY WARRANTY;  without even the implied warranty of MERCHAN-     --
+--  TABILITY or FITNESS FOR A PARTICULAR PURPOSE.                            --
+--                                                                           --
+--  You should have received a copy of the GNU General Public License and of --
+--  the GNU Lesser General Public License along with this program; see files --
+--  LICENSE.GLP and LICENSE.LGPL. If not, see <http:--www.gnu.org-licenses-> --
+--
+-------------------------------------------------------------------------------
+--  This program is based on misc.c, a program of GtkAda, by Adacore, which  --
+--  is licensed under the GNU GPL version 3                                  --
+-----------------------------------------------------------------------------*/
+#include <glib-object.h>
+
+typedef struct {
+   GType type;            // The type. This also acts as a lock while
+                          // initializing the class record.
+   void (*class_init)(gpointer type);           // ada class init
+   GObjectSetPropertyFunc ada_property_setter;
+   GObjectGetPropertyFunc ada_property_getter;
+} AdaGObjectClassRecord;
+typedef AdaGObjectClassRecord* AdaGObjectClass;
+//  Type must be synchronized with Ada.
+
+GType ada_type_from_class (GObjectClass* klass)
+{
+  return G_TYPE_FROM_CLASS (klass);
+}
+
+/** Reuse the dummy padding pointers set by gtk+. They are never used by
+ *  gtk+, and just there for binary compatibility. Simpler to use them than
+ *  do pointer arithmetics to find the pointer on the class structure.
+ */
+#define ADA_CLASS_FROM_C_CLASS(class) (AdaGObjectClass)(class->pdummy[0])
+#define SET_ADA_CLASS_FROM_C_CLASS(class, adaclass) \
+   (class->pdummy[0] = (gpointer)adaclass)
+
+AdaGObjectClass ada_gobject_class_from_object(GObject* object) {
+   return ADA_CLASS_FROM_C_CLASS(G_OBJECT_GET_CLASS(object));
+}
+
+
+/** The class_init for the gobject types created in Ada
+ * The class_data is of type AdaGObjectClass, as set by
+ * ada_initialize_class_record
+ **/
+
+static void
+ada_class_record_init (GObjectClass* klass, gpointer class_data)
+{
+   GType type = G_TYPE_FROM_CLASS (klass);
+   GType parent = g_type_parent (type);
+   GTypeQuery query;
+   GTypeQuery parent_query;
+   const AdaGObjectClass ada_klass = (AdaGObjectClass)class_data;
+
+   g_type_query (type, &query);
+   g_type_query (parent, &parent_query);
+
+   /* Initialize the function pointers for the new signals to NULL */
+
+   memset ((char*)(klass) + parent_query.class_size, 0,
+           query.class_size - parent_query.class_size);
+
+   /* Set a pointer to the AdaGObjectClass, so that we can retrieve it
+    * later from a type.
+    */
+   SET_ADA_CLASS_FROM_C_CLASS(klass, ada_klass);
+
+   if (ada_klass->class_init) {
+      ada_klass->class_init (klass);
+   }
+}
+
+int
+ada_initialize_class_record_replacement
+  (GType         ancestor,
+   gint          nsignals,
+   char*         signals[],
+   GType         parameters[],
+   gint          max_parameters,
+   GType         returns[],
+   gint          max_returns,
+   GInstanceInitFunc instance_init_func,
+   AdaGObjectClass klass,
+   gchar*        type_name)
+{
+   // Make this function thread-safe and ensure we only initialize the class
+   // once
+   if (g_once_init_enter (&klass->type)) {
+       /* Note: The memory allocated in this function is never freed. No need
+          to worry, since this is only allocated once per user's widget type,
+          and might be used until the end of the application */
+
+       GTypeQuery query;
+       int j;
+
+       /* We need to know the ancestor's class/instance sizes */
+       g_type_query (ancestor, &query);
+
+       /*************************
+        * This code is the equivalent of type_name@@_get_type in C. In Ada, the
+        * type will be accessible only once at least one instance of it has
+        * been created (whereas in C the GType is created at elaboration time).
+        *************************/
+
+       GTypeInfo info;
+       info.class_size = query.class_size
+              + nsignals * sizeof (void*);
+              //+ sizeof (AdaGObjectClass);
+       info.base_init = NULL;
+       info.base_finalize = NULL;
+       info.class_init = (GClassInitFunc)(&ada_class_record_init);
+       info.class_finalize = NULL;
+       info.class_data = (gconstpointer)klass;
+       info.instance_size = query.instance_size;
+       info.n_preallocs = 0;
+       info.instance_init = instance_init_func;
+       info.value_table = NULL;
+
+       GType new_type = g_type_register_static (
+             ancestor  /* parent_type */,
+             type_name /* type_name */,
+             &info     /* info */,
+             0         /* flags */);
+
+       /*************************
+        * This code is generally called by g_object_new (which itself is called
+        * from type_name_new() in C). Its result is to create and initialized
+        * (via class_init) the class the first time an instance of it is
+        * created. In Ada, we do not us a _class_init, so we initialize the
+        * signals immediately after creating the class.
+        *************************/
+
+       for (j = 0; j < nsignals; j++) {
+          int count = 0;
+          GClosure *closure;
+
+          while (count < max_parameters &&
+                  (parameters [j * max_parameters + count] != G_TYPE_NONE))
+          {
+                count++;
+          }
+
+          closure = g_signal_type_cclosure_new
+              (new_type, query.class_size + j * sizeof (void*)); /* offset */
+
+          GType return_type = G_TYPE_NONE;
+          GSignalAccumulator acc = NULL;
+
+          if (j < max_returns) {
+             return_type = returns[j];
+             if (return_type == G_TYPE_BOOLEAN) {
+                acc = g_signal_accumulator_true_handled;
+             }
+          }
+
+          /* id = */ g_signal_newv
+            (signals[j],                       /* signal_name */
+             new_type,                         /* itype */
+             G_SIGNAL_RUN_LAST,                /* signal_flags */
+             closure,                          /* class_closure */
+             acc,                              /* accumulator */
+             NULL,                             /* accu_data */
+             g_cclosure_marshal_VOID__VOID,    /* c_marshaller, unused at the
+               Ada level ??? This probably makes the widget unusable from C */
+             return_type,                      /* return_type */
+             count,                            /* n_params */
+             parameters + j * max_parameters); /* param_types */
+       }
+
+       /* Do not call g_type_class_ref here, since that would prevent us
+        * from adding interfaces later on. Instead, rely on the class_init
+        * function
+        */
+       g_once_init_leave (&klass->type, new_type); // sets klass->type
+       return 1;
+   }
+   return 0;
+}

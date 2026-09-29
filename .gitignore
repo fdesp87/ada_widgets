@@ -1,0 +1,13 @@
+# Object file
+*.o
+obj
+# Ada Library Information
+*.ali
+lib
+ali
+demo1
+demo2
+*.~
+*~
+.#*
+.clang-format

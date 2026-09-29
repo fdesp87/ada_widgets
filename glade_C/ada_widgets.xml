@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+                          A d a   W i d g e t s 
+
+                     Copyright (C) 2026 Juan L. Freniche
+
+  This program is free software;  you can redistribute it and-or modify it
+  under terms of the  GNU General Public License and/or the GNU Lesser
+  General Public License, published by the Free Software  Foundation;
+  either versions 3,  or (at your  option) any later version.
+  It is is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY;  without even the implied warranty of MERCHAN-
+  TABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+  You should have received a copy of the GNU General Public License and of
+  the GNU Lesser General Public License along with this program; see files
+  LICENSE.GLP and LICENSE.LGPL. If not, see <http://www.gnu.org-licenses->
+-->
+<glade-catalog name="ada_widgets"
+				library="ada_widgets"
+				depends="gtk+"
+				version="1.0">
+
+	<init-function>glade_ada_widgets_catalog_init</init-function>
+
+	<glade-widget-classes>
+
+		<glade-widget-class
+				name="AdaDatePicker"
+				generic-name="date_picker"
+				title="Date Picker"
+				parent="GtkFrame">
+			<set-property-function>ada_widgets_date_picker_glade_set_property</set-property-function>
+			<get-property-function>ada_widgets_date_picker_glade_get_property</get-property-function>
+			<post-create-function>ada_widgets_date_picker_glade_post_create</post-create-function>
+			<create-editor-property-function>ada_widgets_date_picker_editor_create_eprop</create-editor-property-function>
+
+			<icon-name>date_picker</icon-name>
+			
+			<properties>
+				<property id="min-date"
+						name="Minimum Date"
+						default="1901-01-01"
+						save-always="True">
+					<parameter-spec>
+						<type>GParamString</type>
+					</parameter-spec>
+					<tooltip>Minimum allowed date format: YYYY-MM-DD. Ada limits range between 1901-01-01 and 2399-12-31.</tooltip>
+				</property>
+
+				<property id="max-date"
+						name="Maximum Date"
+						default="2399-12-31"
+						save-always="True">
+					<parameter-spec>
+						<type>GParamString</type>
+					</parameter-spec>
+					<tooltip>Maximum allowed date format: YYYY-MM-DD. Ada limits range between 1901-01-01 and 2399-12-31.</tooltip>
+				</property>
+				
+				<property id="label-xalign" visible="False" disabled="True"/>
+				<property id="label-yalign" visible="False" disabled="True"/>
+				<property id="shadow-type"  visible="False" disabled="True"/>
+			</properties>
+
+		</glade-widget-class>
+
+		<glade-widget-class
+				name="AdaTimePicker"
+				generic-name="time_picker"
+				title="Time Picker"
+				parent="GtkFrame">
+			<set-property-function>ada_widgets_time_picker_glade_set_property</set-property-function>
+			<get-property-function>ada_widgets_time_picker_glade_get_property</get-property-function>
+			<post-create-function>ada_widgets_time_picker_glade_post_create</post-create-function>
+
+			<icon-name>widget-gtk-box</icon-name>
+			
+			<properties>
+				<property id="time-zone"
+						name="Time Zone"
+						default="UTC"
+						save-always="True">
+					<parameter-spec>
+						<type>GParamEnum</type>
+						<value-type>AdaTimeZone</value-type>
+					</parameter-spec>
+					<tooltip>Default time zone for the time picker (e.g., "UTC ", "CET " ...).</tooltip>
+					<displayable-values>
+						<value id="UTC"  name="Universal Time Coordinated"/>
+						<value id="GMT"  name="Greenwich Mean Time"/>
+						<!-- Europe -->
+						<value id="WET"  name="Western European Time"/>
+						<value id="WEST" name="Western European Summer Time"/>
+						<value id="CET"  name="Central European Time"/>
+						<value id="CEST" name="Central European Summer Time"/>
+						<value id="EET"  name="Eastern European Time"/>
+						<value id="EEST" name="Eastern European Summer Time"/>
+						<value id="MSK"  name="Moscow Time"/>
+						<value id="BST"  name="British Summer Time"/>
+						<value id="IST"  name="Irish Standard Time"/>
+						<!-- Americas -->
+						<value id="EST"  name="Eastern Standard Time"/>
+						<value id="EDT"  name="Eastern Daylight Time"/>
+						<value id="CST"  name="Central Standard Time"/>
+						<value id="CDT"  name="Central Daylight Time"/>
+						<value id="MST"  name="Mountain Standard Time"/>
+						<value id="MDT"  name="Mountain Daylight Time"/>
+						<value id="PST"  name="Pacific Standard Time"/>
+						<value id="PDT"  name="Pacific Daylight Time"/>
+						<value id="AST"  name="Atlantic Standard Time"/>
+						<value id="ADT"  name="Atlantic Daylight Time"/>
+						<value id="NST"  name="Newfoundland Standard Time"/>
+						<value id="NDT"  name="Newfoundland Daylight Time"/>
+						<value id="AKST" name="Alaska Standard Time"/>
+						<value id="AKDT" name="Alaska Daylight Time"/>
+						<value id="HST"  name="Hawaii Standard Time"/>
+						<!-- Asia / Pacific -->
+						<value id="JST"  name="Japan Standard Time"/>
+						<value id="KST"  name="Korea Standard Time"/>
+						<value id="CSTP" name="China Standard Time"/>
+						<value id="ISTP" name="Indian Standard Time"/>
+						<value id="SGT"  name="Singapore Time"/>
+						<value id="HKT"  name="Hong Kong Time"/>
+						<value id="AEST" name="Australian Eastern Standard Time"/>
+						<value id="AEDT" name="Australian Eastern Daylight Time"/>
+						<value id="ACST" name="Australian Central Standard Time"/>
+						<value id="ACDT" name="Australian Central Daylight Time"/>
+						<value id="AWST" name="Australian Western Standard Time"/>
+						<value id="NZST" name="New Zealand Standard Time"/>
+						<value id="NZDT" name="New Zealand Daylight Time"/>
+						<!-- Others -->
+						<value id="SAST" name="South Africa Standard Time"/>
+						<value id="CAT"  name="Central Africa Time"/>
+						<value id="EAT"  name="East Africa Time"/>
+						<value id="WAT"  name="West Africa Time"/>
+					</displayable-values>
+				</property>
+				
+				<property id="label-xalign" visible="False" disabled="True"/>
+				<property id="label-yalign" visible="False" disabled="True"/>
+				<property id="shadow-type"  visible="False" disabled="True"/>
+			</properties>
+		</glade-widget-class>
+		
+	</glade-widget-classes>
+
+	<glade-widget-group name="ada_widgets_group" title="Ada Widgets">
+		<glade-widget-class-ref name="AdaDatePicker" />
+		<glade-widget-class-ref name="AdaTimePicker" />
+	</glade-widget-group>
+
+</glade-catalog>

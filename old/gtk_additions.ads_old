@@ -1,0 +1,42 @@
+-------------------------------------------------------------------------------
+--                          A d a   W i d g e t s                            --
+--                                                                           --
+--                     Copyright (C) 2026 Juan L. Freniche                   --
+--                                                                           --
+--  This program is free software;  you can redistribute it and-or modify it --
+--  under terms of the  GNU General Public License  : published by the Free  --
+--  Software  Foundation;  either version 3,  or (at your  option) any later --
+--  version. It is is distributed in the hope that it will be useful,        --
+--  but WITHOUT ANY WARRANTY;  without even the implied warranty of MERCHAN- --
+--  TABILITY or FITNESS FOR A PARTICULAR PURPOSE.                            --
+--                                                                           --
+--  You should have received a copy of the GNU General Public License along  --
+--  with this program; see the file COPYING3.                                --
+--  If not, see <http:--www.gnu.org-licenses->.                              --
+-------------------------------------------------------------------------------
+--  with System;
+--  with Glib;                     use Glib;
+--  with Glib.Object;              use Glib.Object;
+--  with Interfaces.C;
+--  with Interfaces.C.Strings;
+--  
+--  package Gtk_Additions is
+--  
+   --  type GInstanceInitFunc is access procedure (Object  : GObject_Ptr;
+   --                                              G_Class : GObject_Class);
+   --  
+   -----------------------------------------------------------------------------
+   --  INITIALIZE CLASS RECORD
+   -----------------------------------------------------------------------------
+   --  function Initialize_Class_Record
+   --    (Ancestor      : GType;
+   --     Class_Record  : not null access Ada_GObject_Class;
+   --     Type_Name     : String;
+   --     Signals       : Interfaces.C.Strings.chars_ptr_array := No_Signals;
+   --     Parameters    : Signal_Parameter_Types := Null_Parameter_Types;
+   --     Returns       : Signal_Return_Types := No_Return_Types;
+   --     Instance_Init : GInstanceInitFunc := null;
+   --     Class_Init    : Ada_Class_Init := null)
+   --  return Boolean;
+   --  
+--  end Gtk_Additions;
