@@ -14,13 +14,8 @@
 --  with this program; see the file COPYING3.                                --
 --  If not, see <http:--www.gnu.org-licenses->.                              --
 -------------------------------------------------------------------------------
-with Gtk.Container;            use Gtk.Container;
 
-package Gtk_Additions is
+package body Glib.Additions is
 
-   -----------------------------------------------------------------------------
-   --  HAS CHILDREN
-   -----------------------------------------------------------------------------
-   function Has_Children (C : Gtk_Container) return Boolean;
 
-end Gtk_Additions;
+end Glib.Additions;

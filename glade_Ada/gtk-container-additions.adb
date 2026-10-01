@@ -17,7 +17,7 @@
 
 with Gtk.Widget;
 
-package body Gtk_Additions is
+package body Gtk.Container.Additions is
 
    -------------------------------
    --  CHECK FIRST              --
@@ -45,4 +45,4 @@ package body Gtk_Additions is
 
    end Has_Children;
 
-end Gtk_Additions;
+end Gtk.Container.Additions;

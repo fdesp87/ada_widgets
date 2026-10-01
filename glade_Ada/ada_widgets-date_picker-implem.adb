@@ -36,7 +36,7 @@ with Gtk.Handlers;
 with Gtkada.Dialogs;             use Gtkada.Dialogs;
 with Glib.Type_Conversion_Hooks;
 with Ada_Widgets.Date_Picker.Validation;
-with Gtk_Additions;              use Gtk_Additions;
+with Gtk.Container.Additions;              use Gtk.Container.Additions;
 
 
 package body Ada_Widgets.Date_Picker.Implem is
@@ -239,7 +239,7 @@ package body Ada_Widgets.Date_Picker.Implem is
    pragma Convention (C, Class_Init);
 
    procedure Class_Init (Self : GObject_Class) is
-      Class_Ptr : constant GObject_Class_Ptr := Convert (Self);
+      Class_Ptr : constant GObject_Class_Ptr := -Self;
    begin
       Ada_Log ("ada_widgets.date_picker.implem.class_init: "
                & "class=" & Type_Name (Class_Ptr.Type_Class.G_Type)
@@ -298,7 +298,7 @@ package body Ada_Widgets.Date_Picker.Implem is
    pragma Convention (C, Instance_Init);
    procedure Instance_Init (Object : GObject_Ptr;
                             GClass : GObject_Class) is
-      Class_Ptr : constant GObject_Class_Ptr := Convert (GClass);
+      Class_Ptr : constant GObject_Class_Ptr := -GClass;
       Stub : GObject_Record;
    begin
       Ada_Log ("ada_widgets.date_picker.implem.instance_init: "

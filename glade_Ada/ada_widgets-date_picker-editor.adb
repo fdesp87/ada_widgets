@@ -25,7 +25,7 @@ with Ada.Unchecked_Conversion;
 with Glib;
 with Glib.Object;                   use Glib.Object;
 with Glib.Values;                   use Glib.Values;
-with Glib_Additions;                use Glib_Additions;
+with Glib.Additions;                use Glib.Additions;
 with Gtk.Widget;                    use Gtk.Widget;
 with Gtk.GEntry;                    use Gtk.GEntry;
 with Gdk.Event;                     use Gdk.Event;

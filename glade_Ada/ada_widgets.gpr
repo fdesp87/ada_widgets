@@ -48,7 +48,7 @@ library project Ada_Widgets is
       "Ada_Widgets.Time_Picker",
       "Ada_Widgets.Time_Picker.Glade",
       "Ada_Widgets.Time_Picker.Implem",
-      "Glib_Additions",
+      "Glib.Additions",
 
       -- Glade bindings that are part of the public API
       "Glade_Binding",

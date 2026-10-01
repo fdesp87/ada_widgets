@@ -16,9 +16,10 @@
 --  LICENSE.GLP and LICENSE.LGPL. If not, see <http:--www.gnu.org-licenses-> --                              --
 -------------------------------------------------------------------------------
 with Glade_Binding.Widget;
-with Glib.Properties;          use Glib.Properties;
-with Glib.Properties.Creation; use Glib.Properties.Creation;
-with Glib.Object;              use Glib.Object;
+--  with Glib.Properties;                use Glib.Properties;
+--  with Glib.Properties.Creation;       use Glib.Properties.Creation;
+with Interfaces.C.Strings;           use Interfaces.C.Strings;
+with Glib.Object;                    use Glib.Object;
 with Ada_Widgets.Date_Picker.Implem;
 
 package body Ada_Widgets.Date_Picker.Glade is
@@ -73,115 +74,115 @@ package body Ada_Widgets.Date_Picker.Glade is
    -------------------------------------------
    --  SET_PROPERTY                         --
    -------------------------------------------
-   procedure Set_Property (Adtor        : Adaptor;
-                           Object       : GObject_Ptr;
-                           Id           : chars_ptr;
-                           Value_Access : access GValue) is
-      Prop_Spec : constant Param_Spec := null;
-      Prop_Id   : Property_Id := 0;
-      Id_Str    : constant String := Interfaces.C.Strings.Value (Id);
-      Stub      : GObject_Record;
-
-   begin
-      if Id_Str = "min-date" then
-         Prop_Id := PROP_MIN_DATE;
-      elsif Id_Str = "max-date" then
-         Prop_Id := PROP_MAX_DATE;
-      end if;
-
-      if Prop_Id = PROP_MIN_DATE or else Prop_Id = PROP_MAX_DATE then
-         Ada_Log ("ada_widgets.date_picker.glade.set_property: "
-                  & "Id=" & Id_Str
-                  & ", object=" & Type_Name (Get_Type (Get_User_Data (-Object, Stub)))
-                  & "(" & To_Hex (Object'Image) & ")");
-
-         Ada_Widgets.Date_Picker.Implem.Set_Property
-           (Object        => Object,
-            Prop_Id       => Prop_Id,
-            Value         => Value_Access.all,
-            Property_Spec => Prop_Spec);
-         return;
-      end if;
-
-      --  general case
-      --  Ada_Log ("ada_widgets.date_picker.glade.set_property: "
-      --           & "Id=" & Id_Str & ASCII.LF
-      --           & Blanks & "adaptor=" & Value (Get_Name (Adtor))
-      --           & " (" & To_Hex (Adtor'Image) & ")" & ASCII.LF
-      --           & Blanks & "object=" & Type_Name (Get_Type (Get_User_Data (-Object, Stub)))
-      --           & " (" & To_Hex (Object'Image) & ")");
-      declare
-         Parent_Adtor       : Adaptor;
-         Parent_Adtor_Class : Adaptor_Class;
-      begin
-         Parent_Adtor := Get_Parent_Adaptor (Adtor);
-         if Parent_Adtor /= null then
-            Parent_Adtor_Class := Get_Adaptor_Class (Parent_Adtor);
-            if Parent_Adtor_Class /= null
-              and then Parent_Adtor_Class.Set_Property /= null
-            then
-               Parent_Adtor_Class.Set_Property (Parent_Adtor, Object, Id, Value_Access);
-            end if;
-         end if;
-      end;
-   end Set_Property;
+   --  procedure Set_Property (Adtor        : Adaptor;
+   --                          Object       : GObject_Ptr;
+   --                          Id           : chars_ptr;
+   --                          Value_Access : access GValue) is
+   --     Prop_Spec : constant Param_Spec := null;
+   --     Prop_Id   : Property_Id := 0;
+   --     Id_Str    : constant String := Interfaces.C.Strings.Value (Id);
+   --     Stub      : GObject_Record;
+   --
+   --  begin
+   --     if Id_Str = "min-date" then
+   --        Prop_Id := PROP_MIN_DATE;
+   --     elsif Id_Str = "max-date" then
+   --        Prop_Id := PROP_MAX_DATE;
+   --     end if;
+   --
+   --     if Prop_Id = PROP_MIN_DATE or else Prop_Id = PROP_MAX_DATE then
+   --        Ada_Log ("ada_widgets.date_picker.glade.set_property: "
+   --                 & "Id=" & Id_Str
+   --                 & ", object=" & Type_Name (Get_Type (Get_User_Data (-Object, Stub)))
+   --                 & "(" & To_Hex (Object'Image) & ")");
+   --
+   --        Ada_Widgets.Date_Picker.Implem.Set_Property
+   --          (Object        => Object,
+   --           Prop_Id       => Prop_Id,
+   --           Value         => Value_Access.all,
+   --           Property_Spec => Prop_Spec);
+   --        return;
+   --     end if;
+   --
+   --     --  general case
+   --     --  Ada_Log ("ada_widgets.date_picker.glade.set_property: "
+   --     --           & "Id=" & Id_Str & ASCII.LF
+   --     --           & Blanks & "adaptor=" & Value (Get_Name (Adtor))
+   --     --           & " (" & To_Hex (Adtor'Image) & ")" & ASCII.LF
+   --     --           & Blanks & "object=" & Type_Name (Get_Type (Get_User_Data (-Object, Stub)))
+   --     --           & " (" & To_Hex (Object'Image) & ")");
+   --     declare
+   --        Parent_Adtor       : Adaptor;
+   --        Parent_Adtor_Class : Adaptor_Class;
+   --     begin
+   --        Parent_Adtor := Get_Parent_Adaptor (Adtor);
+   --        if Parent_Adtor /= null then
+   --           Parent_Adtor_Class := Get_Adaptor_Class (Parent_Adtor);
+   --           if Parent_Adtor_Class /= null
+   --             and then Parent_Adtor_Class.Set_Property /= null
+   --           then
+   --              Parent_Adtor_Class.Set_Property (Parent_Adtor, Object, Id, Value_Access);
+   --           end if;
+   --        end if;
+   --     end;
+   --  end Set_Property;
 
    -------------------------------------------
    --  GET_PROPERTY                         --
    -------------------------------------------
-   procedure Get_Property (Adtor   : Adaptor;
-                           Object  : GObject_Ptr;
-                           Id      : chars_ptr;
-                           Value_Access   : access GValue) is
-      Prop_Spec : constant Param_Spec := null;
-      Prop_Id   : Property_Id := 0;
-      Id_Str    : constant String := Interfaces.C.Strings.Value (Id);
-      Stub      : GObject_Record;
-
-   begin
-      if Id_Str = "min-date" then
-         Prop_Id := PROP_MIN_DATE;
-      elsif Id_Str = "max-date" then
-         Prop_Id := PROP_MAX_DATE;
-      end if;
-
-      if Prop_Id = PROP_MIN_DATE or else Prop_Id = PROP_MAX_DATE then
-         Ada_Log ("ada_widgets.date_picker.glade.get_property: "
-                  & "Id=" & Id_Str
-                  & ", object=" & Type_Name (Get_Type (Get_User_Data (-Object, Stub)))
-                  & "(" & To_Hex (Object'Image) & ")");
-
-         Ada_Widgets.Date_Picker.Implem.Get_Property
-           (Object        => Object,
-            Prop_Id       => Prop_Id,
-            Value         => Value_Access.all,
-            Property_Spec => Prop_Spec);
-         return;
-      end if;
-
-      --  general case
-      --  Ada_Log ("ada_widgets.date_picker.glade.get_property: "
-      --           & "Id=" & Id_Str & ASCII.LF
-      --           & Blanks & "adaptor=" & Value (Get_Name (Adtor))
-      --           & " (" & To_Hex (Adtor'Image) & ")" & ASCII.LF
-      --           & Blanks & "object=" & Type_Name (Get_Type (Get_User_Data (-Object, Stub)))
-      --           & " (" & To_Hex (Object'Image) & ")");
-      declare
-         Parent_Adtor       : Adaptor;
-         Parent_Adtor_Class : Adaptor_Class;
-      begin
-         Parent_Adtor := Get_Parent_Adaptor (Adtor);
-         if Parent_Adtor /= null then
-            Parent_Adtor_Class := Get_Adaptor_Class (Parent_Adtor);
-            if Parent_Adtor_Class /= null
-              and then Parent_Adtor_Class.Get_Property /= null
-            then
-               Parent_Adtor_Class.Get_Property (Parent_Adtor, Object, Id, Value_Access);
-            end if;
-         end if;
-      end;
-
-   end Get_Property;
+   --  procedure Get_Property (Adtor   : Adaptor;
+   --                          Object  : GObject_Ptr;
+   --                          Id      : chars_ptr;
+   --                          Value_Access   : access GValue) is
+   --     Prop_Spec : constant Param_Spec := null;
+   --     Prop_Id   : Property_Id := 0;
+   --     Id_Str    : constant String := Interfaces.C.Strings.Value (Id);
+   --     Stub      : GObject_Record;
+   --
+   --  begin
+   --     if Id_Str = "min-date" then
+   --        Prop_Id := PROP_MIN_DATE;
+   --     elsif Id_Str = "max-date" then
+   --        Prop_Id := PROP_MAX_DATE;
+   --     end if;
+   --
+   --     if Prop_Id = PROP_MIN_DATE or else Prop_Id = PROP_MAX_DATE then
+   --        Ada_Log ("ada_widgets.date_picker.glade.get_property: "
+   --                 & "Id=" & Id_Str
+   --                 & ", object=" & Type_Name (Get_Type (Get_User_Data (-Object, Stub)))
+   --                 & "(" & To_Hex (Object'Image) & ")");
+   --
+   --        Ada_Widgets.Date_Picker.Implem.Get_Property
+   --          (Object        => Object,
+   --           Prop_Id       => Prop_Id,
+   --           Value         => Value_Access.all,
+   --           Property_Spec => Prop_Spec);
+   --        return;
+   --     end if;
+   --
+   --     --  general case
+   --     --  Ada_Log ("ada_widgets.date_picker.glade.get_property: "
+   --     --           & "Id=" & Id_Str & ASCII.LF
+   --     --           & Blanks & "adaptor=" & Value (Get_Name (Adtor))
+   --     --           & " (" & To_Hex (Adtor'Image) & ")" & ASCII.LF
+   --     --           & Blanks & "object=" & Type_Name (Get_Type (Get_User_Data (-Object, Stub)))
+   --     --           & " (" & To_Hex (Object'Image) & ")");
+   --     declare
+   --        Parent_Adtor       : Adaptor;
+   --        Parent_Adtor_Class : Adaptor_Class;
+   --     begin
+   --        Parent_Adtor := Get_Parent_Adaptor (Adtor);
+   --        if Parent_Adtor /= null then
+   --           Parent_Adtor_Class := Get_Adaptor_Class (Parent_Adtor);
+   --           if Parent_Adtor_Class /= null
+   --             and then Parent_Adtor_Class.Get_Property /= null
+   --           then
+   --              Parent_Adtor_Class.Get_Property (Parent_Adtor, Object, Id, Value_Access);
+   --           end if;
+   --        end if;
+   --     end;
+   --
+   --  end Get_Property;
 
    -------------------------------------------
    --       POST CREATE                     --

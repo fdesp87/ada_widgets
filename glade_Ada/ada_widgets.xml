@@ -30,8 +30,10 @@
 				generic-name="date_picker"
 				title="Date Picker"
 				parent="GtkFrame">
+<!--
 			<set-property-function>ada_widgets_date_picker_glade_set_property</set-property-function>
 			<get-property-function>ada_widgets_date_picker_glade_get_property</get-property-function>
+-->
 			<post-create-function>ada_widgets_date_picker_glade_post_create</post-create-function>
 			<create-editor-property-function>ada_widgets_date_picker_editor_create_eprop</create-editor-property-function>
 
@@ -70,8 +72,10 @@
 				generic-name="time_picker"
 				title="Time Picker"
 				parent="GtkFrame">
+<!--
 			<set-property-function>ada_widgets_time_picker_glade_set_property</set-property-function>
 			<get-property-function>ada_widgets_time_picker_glade_get_property</get-property-function>
+-->
 			<post-create-function>ada_widgets_time_picker_glade_post_create</post-create-function>
 
 			<icon-name>widget-gtk-box</icon-name>

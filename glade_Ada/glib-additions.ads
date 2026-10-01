@@ -20,13 +20,12 @@ with Interfaces.C.Strings;
 with Ada.Unchecked_Conversion;
 with System.Address_To_Access_Conversions;
 
-with Glib;                     use Glib;
 with Glib.Object;              use Glib.Object;
 with Glib.Values;              use Glib.Values;
 with Glib.GSlist;              use Glib.GSlist;
 with Glib.Properties.Creation; use Glib.Properties.Creation;
 
-package Glib_Additions is
+package Glib.Additions is
    pragma Elaborate_Body;
 
    -------------------------------------------
@@ -36,9 +35,11 @@ package Glib_Additions is
      array (Natural range <>) of Interfaces.Unsigned_8;
    pragma Convention (C, Byte_Storage);
 
-   -----------------------------------------
+   ----------------------------------------------------
    --  GTPE CLASS
-   -----------------------------------------
+   --  Corresponds to GTypeClass in gtype.h line 451
+   --  Corresponds to GType_Class in glib.ads line 297
+   ----------------------------------------------------
    type GType_Class_Block is record
       G_Type : Glib.GType;
    end record;
@@ -50,17 +51,20 @@ package Glib_Additions is
    for GType_Class_Block'Size use 8 * 8;
    pragma Assert (GType_Class_Block'Size = 8 * 8);
 
-   type GType_Class_Ptr is access all GType_Class_Block;
-   pragma Convention (C, GType_Class_Ptr);
-   pragma No_Strict_Aliasing (GType_Class_Ptr);
+   package GType_Class_Conversions is new System.Address_To_Access_Conversions
+     (Object => GType_Class_Block);
 
-   function "+" is new Ada.Unchecked_Conversion
-     (Source => System.Address,
-      Target => GType_Class_Ptr);
+   subtype GType_Class_Ptr is GType_Class_Conversions.Object_Pointer;
 
-   -----------------------------------------
+   function "+" (Addr : System.Address) return GType_Class_Ptr
+              renames GType_Class_Conversions.To_Pointer;
+   function "-" (Ptr : GType_Class_Ptr) return System.Address
+              renames GType_Class_Conversions.To_Address;
+
+   ----------------------------------------------------
    --  GTYPE INSTANCE
-   -----------------------------------------
+   --  Corresponds to _GTypeInstance in gtype.h line 461
+   -----------------------------------------------------
    type GType_Instance_Block is record
       G_Class : GType_Class_Ptr;
    end record;
@@ -72,11 +76,12 @@ package Glib_Additions is
    for GType_Instance_Block'Size use 8 * 8;
    pragma Assert (GType_Instance_Block'Size = 8 * 8);
 
-   -------------------------------------------------
+   ---------------------------------------------------------------------
    --  GOBJECT
    --  Do not use the glib.gobjet definition
    --  Corresponds to _GObject in gobject.h line 252
-   -------------------------------------------------
+   --  Corresponds to GObject_Record (tagged) in glib.object.ads line 40
+   ----------------------------------------------------------------------
    type GObject_Block is record
       G_Type_Instance : GType_Instance_Block;
       Ref_Count       : Glib.Guint;
@@ -92,16 +97,22 @@ package Glib_Additions is
    for GObject_Block'Size use 24 * 8;
    pragma Assert (GObject_Block'Size = 24 * 8);
 
-   type GObject_Ptr is access all GObject_Block;
-   pragma Convention (C, GObject_Ptr);
-   pragma No_Strict_Aliasing (GObject_Ptr);
+   package GObject_Conversions is new System.Address_To_Access_Conversions
+     (Object => GObject_Block);
 
-   function "-" is new Ada.Unchecked_Conversion
-     (Source => GObject_Ptr,
-      Target => System.Address);
+   subtype GObject_Ptr is GObject_Conversions.Object_Pointer;
+
+   function "+" (Addr : System.Address) return GObject_Ptr
+              renames GObject_Conversions.To_Pointer;
+   function "-" (Ptr : GObject_Ptr) return System.Address
+              renames GObject_Conversions.To_Address;
+
+   --  There is no direct conversion between GObject_Ptr and GObject_Record. Use
+   --  the routines that interface with C in glib.object.ads
 
    -------------------------------------------------------
    --  PROPERTY LIST
+   --  property is in glib.ads line 253
    -------------------------------------------------------
    package Property_Conversions is new System.Address_To_Access_Conversions
      (Object => Property);
@@ -110,7 +121,6 @@ package Glib_Additions is
 
    function "+" (Addr : System.Address) return Property_Ptr
               renames Property_Conversions.To_Pointer;
-
    function "-" (Ptr : Property_Ptr) return System.Address
               renames Property_Conversions.To_Address;
 
@@ -119,6 +129,7 @@ package Glib_Additions is
    -------------------------------------------------------
    --  G OBJECT CLASS BLOCK
    --  Corresponds to _GObjectClass in gobject.h line 322
+   --  Corresponds to GObject_Class in Glib.Object.ads line 233
    -------------------------------------------------------
    type Set_Property_Func is access procedure
      (Object        : GObject_Ptr;
@@ -156,12 +167,14 @@ package Glib_Additions is
    pragma Convention (C, GObject_Class_Ptr);
    pragma No_Strict_Aliasing (GObject_Class_Ptr);
 
-   function Convert is new Ada.Unchecked_Conversion
-     (Source => Glib.Object.GObject_Class,
-      Target => GObject_Class_Ptr);
+   function "-" is new Ada.Unchecked_Conversion (Source => Glib.Object.GObject_Class,
+                                                 Target => GObject_Class_Ptr);
+   function "+" is new Ada.Unchecked_Conversion (Source => GObject_Class_Ptr,
+                                                 Target => Glib.Object.GObject_Class);
 
    -----------------------------------------------------------------------------
    --  G TYPE QUERY
+   --  Correponds to _GTypeQuery in gtype.h line 488
    -----------------------------------------------------------------------------
    type GType_Query is record
       Type_Id       : Glib.GType;
@@ -184,9 +197,10 @@ package Glib_Additions is
                            Query   : access GType_Query);
    pragma Import (C, G_Type_Query, "g_type_query");
 
-   -----------------------------------------------------------------------------
+   ----------------------------------------------------
    --  G TYPE INFO
-   -----------------------------------------------------------------------------
+   --  Corresponds to _GtyupeInfo in gtype.h line 1122
+   -----------------------------------------------------
    type GBase_Init_Func is access procedure (G_Class : GObject_Class);
    pragma Convention (C, GBase_Init_Func);
 
@@ -241,7 +255,6 @@ package Glib_Additions is
       Type_Name   : Interfaces.C.Strings.chars_ptr;
       Info        : access GType_Info;
       Flags       : GType_Flags) return Glib.GType;
-   pragma Import
-     (C, G_Type_Register_Static, "g_type_register_static");
+   pragma Import (C, G_Type_Register_Static, "g_type_register_static");
 
-end Glib_Additions;
+end Glib.Additions;

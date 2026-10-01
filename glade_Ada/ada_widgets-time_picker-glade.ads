@@ -16,10 +16,9 @@
 --  LICENSE.GLP and LICENSE.LGPL. If not, see <http:--www.gnu.org-licenses-> --                              --
 -------------------------------------------------------------------------------
 with Glib;                         use Glib;
-with Glib.Values;                  use Glib.Values;
-with Glib_Additions;               use Glib_Additions;
+--  with Glib.Values;                  use Glib.Values;
+with Glib.Additions;               use Glib.Additions;
 
-with Interfaces.C.Strings;         use Interfaces.C.Strings;
 
 with Glade_Binding;                use Glade_Binding;
 with Glade_Binding.Widget_Adaptor; use Glade_Binding.Widget_Adaptor;
@@ -30,20 +29,20 @@ package Ada_Widgets.Time_Picker.Glade is
    -------------------------------------------
    --  SET_PROPERTY                         --
    -------------------------------------------
-   procedure Set_Property (Adtor        : Adaptor;
-                           Object       : GObject_Ptr;
-                           Id           : chars_ptr;
-                           Value_Access : access GValue);
-   pragma Export (C, Set_Property, "ada_widgets_time_picker_glade_set_property");
+   --  procedure Set_Property (Adtor        : Adaptor;
+   --                          Object       : GObject_Ptr;
+   --                          Id           : chars_ptr;
+   --                          Value_Access : access GValue);
+   --  pragma Export (C, Set_Property, "ada_widgets_time_picker_glade_set_property");
 
    -------------------------------------------
    --  GET_PROPERTY                         --
    -------------------------------------------
-   procedure Get_Property (Adtor        : Adaptor;
-                           Object       : GObject_Ptr;
-                           Id           : chars_ptr;
-                           Value_Access : access GValue);
-   pragma Export (C, Get_Property, "ada_widgets_time_picker_glade_get_property");
+   --  procedure Get_Property (Adtor        : Adaptor;
+   --                          Object       : GObject_Ptr;
+   --                          Id           : chars_ptr;
+   --                          Value_Access : access GValue);
+   --  pragma Export (C, Get_Property, "ada_widgets_time_picker_glade_get_property");
 
    -------------------------------------------
    --  POST CREATE                          --

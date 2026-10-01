@@ -18,7 +18,7 @@
 --  This binding is based on glade-3.40, licensed under GNU GPL version 2    --
 -------------------------------------------------------------------------------
 with System;
-with Glib_Additions;
+with Glib.Additions;
 
 package Glade_Binding is
    --  Some missing types
@@ -42,6 +42,6 @@ package Glade_Binding is
    subtype GladeXmlContext_Ptr is System.Address;
    subtype GladeXmlNode_Ptr is System.Address;
 
-   subtype Byte_Storage is Glib_Additions.Byte_Storage;
+   subtype Byte_Storage is Glib.Additions.Byte_Storage;
 
 end Glade_Binding;

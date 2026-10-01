@@ -21,7 +21,7 @@ with Ada.Characters.Handling;
 with Glib;
 with Glib.Object;                       use Glib.Object;
 with Glib.Values;                       use Glib.Values;
-with Glib_Additions;                    use Glib_Additions;
+with Glib.Additions;                    use Glib.Additions;
 with Glade_Binding;
 with Glade_Binding.Properties;          use Glade_Binding.Properties;
 with Glade_Binding.Property_Definition; use Glade_Binding.Property_Definition;
@@ -193,6 +193,7 @@ package body Ada_Widgets.Date_Picker.Validation is
 
       use type IC.size_t;
       use type Glib.GType;
+      use type GObject_Ptr;
    begin
       --  Reentrancy protection
       if Showing_Error then

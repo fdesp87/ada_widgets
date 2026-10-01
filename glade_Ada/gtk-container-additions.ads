@@ -15,7 +15,11 @@
 --  If not, see <http:--www.gnu.org-licenses->.                              --
 -------------------------------------------------------------------------------
 
-package body Glib_Additions is
+package Gtk.Container.Additions is
 
+   -----------------------------------------------------------------------------
+   --  HAS CHILDREN
+   -----------------------------------------------------------------------------
+   function Has_Children (C : Gtk_Container) return Boolean;
 
-end Glib_Additions;
+end Gtk.Container.Additions;

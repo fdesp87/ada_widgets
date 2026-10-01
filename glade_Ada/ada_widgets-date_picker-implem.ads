@@ -19,7 +19,7 @@ with Glib;              use Glib;
 with Glib.Object;       use Glib.Object;
 with Glib.Values;
 with Glib.Properties;
-with Glib_Additions;    use Glib_Additions;
+with Glib.Additions;    use Glib.Additions;
 with Glib.Properties.Creation; use Glib.Properties.Creation;
 
 with Gtk.Frame;         use Gtk.Frame;

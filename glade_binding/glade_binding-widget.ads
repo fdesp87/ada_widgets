@@ -23,7 +23,7 @@ with Interfaces.C.Extensions;  use Interfaces.C.Extensions;
 
 with Glib.Values;
 with Glib;
-with Glib_Additions;           use Glib_Additions;
+with Glib.Additions;           use Glib.Additions;
 
 with Gdk.Event;
 with Gtk.Tree_Model;
