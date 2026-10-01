@@ -1,5 +1,5 @@
 # ada_widgets
-Ada custom widgets for Gtk3: date picker and time picker.
+Ada custom widgets for Gtk3: date picker and time picker. Glade support is in the package.
 
 Gtk3 provide a native calendar but there are not native date pickers nor time pickers.
 
