@@ -17,3 +17,20 @@
 -----------------------------------------------------------------------------*/
 
 #include "ada_widgets_date_picker.h"
+
+//---------------------------------
+//  date picker property to string
+//---------------------------------
+const char *
+ada_widgets_date_picker_prop_to_string (gint id)
+{
+  switch (id)
+    {
+    case PROP_MIN_DATE:
+      return "PROP_MIN_DATE";
+    case PROP_MAX_DATE:
+      return "PROP_MAX_DATE";
+    default:
+      return "PROP_???";
+    }
+}

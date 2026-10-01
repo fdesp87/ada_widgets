@@ -39,10 +39,7 @@ struct _AdaTimePickerClass
 /*----------------------------------------------------------------------------*/
 /* GET TYPE                                                                   */
 /*----------------------------------------------------------------------------*/
-G_MODULE_EXPORT
-GType ada_widgets_time_picker_implem_get_type (void)
-   __asm__("ada_time_picker_get_type");
-// Note: It is mandatory to keep the exported symbol as it is.
+GType ada_widgets_time_picker_implem_get_type (void);
 
 /*----------------------------------------------------------------------------*/
 /* GET TYPE                                                                   */

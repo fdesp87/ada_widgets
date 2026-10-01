@@ -19,14 +19,15 @@
 #include "ada_widgets_time_picker_implem.h"
 
 /*----------------------------------------------------------------------------*/
-/*  GET TYPE                                                                  */
+/* GET TYPE                                                                   */
 /*----------------------------------------------------------------------------*/
-// GType
-// ada_widgets_time_picker_glade_get_type (void)
-// {
-//   Ada_Log ("ada_widgets_time_picker_glade_get_type");
-//   return ada_widgets_time_picker_implem_get_type();
-// }
+G_MODULE_EXPORT GType
+ada_widgets_time_picker_glade_get_type (void)
+{
+  Ada_Log ("ada_widgets_time_picker_glade_get_type");
+  ada_widgets_time_picker_implem_get_type();
+}
+
 
 /*----------------------------------------------------------------------------*/
 /* POST CREATE                                                                */
@@ -37,16 +38,20 @@ ada_widgets_time_picker_glade_post_create (GladeWidgetAdaptor *adaptor,
                                            GladeCreateReason   reason)
 {
   Ada_Log ("ada_widgets_time_picker_glade_post_create:\n"
-                   "%sadaptor=%s (%p),\n"
-                   "%sobject=%s (%p),\n"
-                   "%sreason=%d",
-                   Blanks, glade_widget_adaptor_get_name (adaptor), (void *)adaptor,
-                   Blanks, G_OBJECT_TYPE_NAME (object), (void *)object,
-                   Blanks, (int)reason);
+           "%sadaptor=%s (%p),\n"
+           "%sobject=%s (%p),\n"
+           "%sreason=%d",
+           Blanks, glade_widget_adaptor_get_name (adaptor), (void *)adaptor,
+           Blanks, G_OBJECT_TYPE_NAME (object), (void *)object, Blanks,
+           (int)reason);
 
-  glade_widget_push_superuser ();
-  ada_widgets_time_picker_implem_build (object, FALSE);
-  glade_widget_pop_superuser ();
+  if ((reason = GLADE_CREATE_LOAD) || (reason = GLADE_CREATE_COPY)
+        || (reason = GLADE_CREATE_USER))
+    {
+      glade_widget_push_superuser ();
+      ada_widgets_time_picker_implem_build (object, FALSE);
+      glade_widget_pop_superuser ();
+    }
 }
 
 /*----------------------------------------------------------------------------*/
@@ -76,6 +81,14 @@ ada_widgets_time_picker_glade_set_property (GladeWidgetAdaptor *adaptor,
     }
   else
     {
+      // Ada_Log ("ada_widgets_time_picker_glade_set_property "
+      //          "id=%s\n"
+      //          "%sadaptor=%s (%p)\n"
+      //          "%sobject=%s (%p)",
+      //          id,
+      //          Blanks, glade_widget_adaptor_get_name (adaptor), (void *)adaptor,
+      //          Blanks, G_OBJECT_TYPE_NAME (object), (void *)object);
+
       GladeWidgetAdaptor *parent_adaptor =
         glade_widget_adaptor_get_parent_adaptor (adaptor);
 
@@ -106,8 +119,8 @@ ada_widgets_time_picker_glade_get_property (GladeWidgetAdaptor *adaptor,
         AdaTimeZone time_zone = saved_tz ? GPOINTER_TO_INT (saved_tz) : ADA_TIME_ZONE_UTC;
 
         Ada_Log ("ada_widgets_time_picker_glade_get_property "
-                         "id=%s, value (enum)=%d"
-                         ", object=%s (0x%016lx)",
+                         "id=%s, value (enum)=%d\n"
+                         "object=%s (%p)\n",
                          id, (int) time_zone,
                          G_OBJECT_TYPE_NAME (object),
                          (void *)object);
@@ -116,7 +129,15 @@ ada_widgets_time_picker_glade_get_property (GladeWidgetAdaptor *adaptor,
     }
     else
     {
-        GladeWidgetAdaptor *parent_adaptor
+      // Ada_Log ("ada_widgets_time_picker_glade_get_property "
+      //          "id=%s\n",
+      //          "%sadaptor=%s (%p)\n",
+      //          "%sobject=%s (%p)",
+      //          id,
+      //          Blanks, glade_widget_adaptor_get_name (adaptor), (void *)adaptor,
+      //          G_OBJECT_TYPE_NAME (object), (void *)object);
+
+      GladeWidgetAdaptor *parent_adaptor
           = glade_widget_adaptor_get_parent_adaptor (adaptor);
         if (parent_adaptor)
         {

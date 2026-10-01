@@ -85,7 +85,7 @@
 						<type>GParamEnum</type>
 						<value-type>AdaTimeZone</value-type>
 					</parameter-spec>
-					<tooltip>Default time zone for the time picker (e.g., "UTC ", "CET " ...).</tooltip>
+					<tooltip>Time zone for the time picker (e.g., "UTC ", "CET " ...).</tooltip>
 					<displayable-values>
 						<value id="UTC"  name="Universal Time Coordinated"/>
 						<value id="GMT"  name="Greenwich Mean Time"/>

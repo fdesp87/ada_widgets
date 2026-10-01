@@ -15,9 +15,11 @@
 --  the GNU Lesser General Public License along with this program; see files --
 --  LICENSE.GLP and LICENSE.LGPL. If not, see <http:--www.gnu.org-licenses-> --                              --
 -------------------------------------------------------------------------------
-with Glib;                     use Glib;
-with Glib.Values;              use Glib.Values;
-with Interfaces.C.Strings;     use Interfaces.C.Strings;
+with Glib;                         use Glib;
+with Glib.Values;                  use Glib.Values;
+with Glib_Additions;               use Glib_Additions;
+
+with Interfaces.C.Strings;         use Interfaces.C.Strings;
 
 with Glade_Binding;                use Glade_Binding;
 with Glade_Binding.Widget_Adaptor; use Glade_Binding.Widget_Adaptor;

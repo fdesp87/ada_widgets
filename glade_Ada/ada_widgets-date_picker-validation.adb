@@ -19,12 +19,14 @@ with Interfaces.C;
 with Interfaces.C.Strings;
 with Ada.Characters.Handling;
 with Glib;
-with Glib.Object;                   use Glib.Object;
-with Glib.Values;                   use Glib.Values;
+with Glib.Object;                       use Glib.Object;
+with Glib.Values;                       use Glib.Values;
+with Glib_Additions;                    use Glib_Additions;
 with Glade_Binding;
 with Glade_Binding.Properties;          use Glade_Binding.Properties;
 with Glade_Binding.Property_Definition; use Glade_Binding.Property_Definition;
 with Glade_Binding.Widget;              use Glade_Binding.Widget;
+
 
 package body Ada_Widgets.Date_Picker.Validation is
 
@@ -169,14 +171,12 @@ package body Ada_Widgets.Date_Picker.Validation is
    ------------------------------------------------------------------
    Showing_Error : Boolean := False;   -- reentrancy guard
 
-   function Validate_Date_Value
-     (Object   : Glade_Binding.GObject_Ptr;
-      Prop_Id  : chars_ptr;
-      New_Date : chars_ptr) return Boolean;
-   function Validate_Date_Value
-     (Object   : Glade_Binding.GObject_Ptr;
-      Prop_Id  : chars_ptr;
-      New_Date : chars_ptr) return Boolean
+   function Validate_Date_Value (Object   : GObject_Ptr;
+                                 Prop_Id  : chars_ptr;
+                                 New_Date : chars_ptr) return Boolean;
+   function Validate_Date_Value (Object   : GObject_Ptr;
+                                 Prop_Id  : chars_ptr;
+                                 New_Date : chars_ptr) return Boolean
    is
 
       Is_Min       : Boolean;
@@ -193,7 +193,6 @@ package body Ada_Widgets.Date_Picker.Validation is
 
       use type IC.size_t;
       use type Glib.GType;
-      use type Glade_Binding.GObject_Ptr;
    begin
       --  Reentrancy protection
       if Showing_Error then
@@ -312,7 +311,7 @@ package body Ada_Widgets.Date_Picker.Validation is
       Prop_Id  : chars_ptr := Null_Ptr;
       New_Date : chars_ptr;
       Gwidget  : Glade_Widget;
-      Object   : Glade_Binding.GObject_Ptr := null;
+      Object   : GObject_Ptr := null;
    begin
       if Prop = null then
          return IC.True;

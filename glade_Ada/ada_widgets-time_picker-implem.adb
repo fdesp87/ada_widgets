@@ -21,22 +21,21 @@ with Interfaces.C.Strings;
 
 with Gtk.Enums;
 with Gtk.Image;
-with Gtk_Additions;            use Gtk_Additions;
-with Gtk.Container;            use Gtk.Container;
-with Gtk.Box;                  use Gtk.Box;
-with Gtk.GEntry;               use Gtk.GEntry;
-with Gtk.Button;               use Gtk.Button;
-with Gtk.Widget;               use Gtk.Widget;
-with Gtk.Css_Provider;         use Gtk.Css_Provider;
-with Gtk.Style_Provider;       use Gtk.Style_Provider;
+with Gtk.Container;              use Gtk.Container;
+with Gtk.Box;                    use Gtk.Box;
+with Gtk.GEntry;                 use Gtk.GEntry;
+with Gtk.Button;                 use Gtk.Button;
+with Gtk.Widget;                 use Gtk.Widget;
+with Gtk.Css_Provider;           use Gtk.Css_Provider;
+with Gtk.Style_Provider;         use Gtk.Style_Provider;
 with Gtk.Style_Context;
 with Gdk.Screen;
 with Glib.Error;
-with Gdk.Pixbuf;               use Gdk.Pixbuf;
+with Gdk.Pixbuf;                 use Gdk.Pixbuf;
 with Gtkada.Types;
-with Glade_Binding;            use Glade_Binding;
-with Glib.Generic_Properties;  use Glib.Generic_Properties;
+with Glib.Generic_Properties;    use Glib.Generic_Properties;
 with Glib.Type_Conversion_Hooks;
+with Gtk_Additions;              use Gtk_Additions;
 
 package body Ada_Widgets.Time_Picker.Implem is
 
@@ -65,13 +64,14 @@ package body Ada_Widgets.Time_Picker.Implem is
    --  SET PROPERTY                         --
    -------------------------------------------
 
-   procedure Set_Property (Object        : access Glib.Object.GObject_Record'Class;
+   procedure Set_Property (Object        : GObject_Ptr;
                            Prop_Id       : Property_Id;
                            Value         : Glib.Values.GValue;
                            Property_Spec : Param_Spec) is
       pragma Unreferenced (Property_Spec);
+      Stub : GObject_Record;
+      Ada_Object : constant Glib.Object.GObject := Get_User_Data (-Object, Stub);
    begin
-      Ada_Log ("ada_widgets.time_picker.implem.set_property");
 
       case Prop_Id is
          when PROP_TIME_ZONE =>
@@ -80,10 +80,12 @@ package body Ada_Widgets.Time_Picker.Implem is
                       Time_Zone_Properties.Get_Enum (Value);
             begin
                Ada_Log ("ada_widgets.time_picker.implem.set_property: "
-                        & "prop_id=" & Prop_Id'Image
-                        & ", value=" & Time_Zone'Image (TZ));
+                        & "prop_id=" & Prop_To_String (Prop_Id)
+                        & ", value=" & Time_Zone'Image (TZ)
+                        & ", object=" & Type_Name (Get_Type (Ada_Object))
+                        & " (" & To_Hex (Object'Image) & ")");
 
-               Time_User_Data.Set (Object => Object,
+               Time_User_Data.Set (Object => Ada_Object,
                                    Data   => TZ,
                                    Id     => "ada-picker-time-zone");
             end;
@@ -95,11 +97,13 @@ package body Ada_Widgets.Time_Picker.Implem is
    -------------------------------------------
    --  GET PROPERTY                         --
    -------------------------------------------
-   procedure Get_Property (Object        : access Glib.Object.GObject_Record'Class;
+   procedure Get_Property (Object        : GObject_Ptr;
                            Prop_Id       : Property_Id;
                            Value         : out Glib.Values.GValue;
                            Property_Spec : Param_Spec) is
       pragma Unreferenced (Property_Spec);
+      Stub : GObject_Record;
+      Ada_Object : constant Glib.Object.GObject := Get_User_Data (-Object, Stub);
    begin
       Ada_Log ("ada_widgets.time_picker.implem.get_property");
 
@@ -107,13 +111,15 @@ package body Ada_Widgets.Time_Picker.Implem is
          when PROP_TIME_ZONE =>
             declare
                TZ : constant Time_Zone :=
-                      Time_User_Data.Get (Object  => Object,
+                      Time_User_Data.Get (Object  => Ada_Object,
                                           Id      => "ada-picker-time-zone",
                                           Default => UTC);
             begin
                Ada_Log ("ada_widgets.time_picker.implem.get_property: "
-                        & "prop_id=" & Prop_Id'Image
-                        & ", value=" & Time_Zone'Image (TZ));
+                        & "prop_id=" & Prop_To_String (Prop_Id)
+                        & ", value=" & Time_Zone'Image (TZ)
+                        & ", object=" & Type_Name (Get_Type (Ada_Object))
+                        & " (" & To_Hex (Object'Image) & ")");
 
                Time_Zone_Properties.Set_Enum (Value, TZ);
             end;
@@ -144,6 +150,7 @@ package body Ada_Widgets.Time_Picker.Implem is
    --           package Time_Zone_Properties is new
    --              Glib.Generic_Properties.Generic_Enumeration_Property
    --               ("AdaTimeZone", Time_Zone);
+   -------------------------------------------
 
    -------------------------------------------
    --  CLASS INIT                           --
@@ -152,12 +159,13 @@ package body Ada_Widgets.Time_Picker.Implem is
 
    procedure Class_Init (Self : GObject_Class);
    pragma Convention (C, Class_Init);
+
    procedure Class_Init (Self : GObject_Class) is
-      Class_Ptr : constant GObject_Class_Block_Ptr := Convert (Self);
+      Class_Ptr : constant GObject_Class_Ptr := Convert (Self);
    begin
       Ada_Log ("ada_widgets.time_picker.implem.class_init: "
-               & "klass=" & Type_Name (Klass)
-               & " (" & To_Hex (Self'Image) & ")");
+               & "class=" & Type_Name (Class_Ptr.Type_Class.G_Type)
+               & " (" & To_Hex (Class_Ptr'Image) & ")");
 
       Class_Ptr.Set_Property := Set_Property'Access;
       Class_Ptr.Get_Property := Get_Property'Access;
@@ -168,29 +176,53 @@ package body Ada_Widgets.Time_Picker.Implem is
          Property_Spec => Time_Zone_Properties.Gnew_Enum
            (Name      => "time-zone",
             Nick      => "Time Zone",
-            Blurb     => "Time Zone",
+            Blurb     => "Time zone for the time picker (e.g., UTC, CET, EST ...)",
             Default   => UTC,
             Flags     => Param_Readable or Param_Writable));
-   end Class_Init;
+
+      declare
+         Prop_List : constant Glib.Param_Spec_Array := Class_List_Properties (Self);
+         Found : Boolean := False;
+      begin
+         if Prop_List'Length = 0 then
+            Ada_Log ("ada_widgets.date_picker.implem.class_init: no properties");
+         else
+            for I in Prop_List'Range loop
+               if Owner_Type (Prop_List (I)) = Class_Ptr.Type_Class.G_Type then
+                  if not Found then
+                     Found := True;
+                     Ada_Log ("ada_widgets.date_picker.implem.class_init: own properties:");
+                  end if;
+                  Ada_Log (Blanks & Pspec_Name (Prop_List (I)));
+               end if;
+            end loop;
+            if not Found then
+               Ada_Log ("ada_widgets.date_picker.implem.class_init: no own properties");
+           end if;
+         end if;
+      end;
+    end Class_Init;
 
    -------------------------------------------
    --  TIME PICKER INIT                     --
    -------------------------------------------
-   procedure Time_Picker_Init (Object : GObject_Ptr;
-                               GClass : GObject_Class);
-   pragma Convention (C, Time_Picker_Init);
-   procedure Time_Picker_Init (Object : GObject_Ptr;
-                               GClass : GObject_Class) is
+   procedure Instance_Init (Object : GObject_Ptr;
+                            GClass : GObject_Class);
+   pragma Convention (C, Instance_Init);
+   procedure Instance_Init (Object : GObject_Ptr;
+                            GClass : GObject_Class) is
+      Class_Ptr : constant GObject_Class_Ptr := Convert (GClass);
       Stub : GObject_Record;
    begin
-      Ada_Log ("ada_widgets.time_picker.implem.time_picker_init: " & ASCII.LF
-               & Blanks & "object=" & Type_Name (Get_Type (Get_User_Data (-Object, Stub)))
-               & "(" & To_Hex (Object'Image) & ")" & ASCII.LF
-               & Blanks & "klass=" & To_Hex (GClass'Image));
+      Ada_Log ("ada_widgets.time_picker.implem.time_picker_instance_init: "
+               & "object=" & Type_Name (Get_Type (Get_User_Data (-Object, Stub)))
+               & "(" & To_Hex (Object'Image) & ")"
+               & ", class=" & Type_Name (Class_Ptr.Type_Class.G_Type)
+               & " (" & To_Hex (Class_Ptr'Image) & ")");
 
       Build (Object => Get_User_Data (-Object, Stub),
              Show   => True);
-   end Time_Picker_Init;
+   end Instance_Init;
 
    -------------------------------------------
    --  GET TYPE                             --
@@ -213,7 +245,7 @@ package body Ada_Widgets.Time_Picker.Implem is
             Class_Data      => System.Null_Address,
             Instance_Size   => IC.unsigned_short (Parent_Query.Instance_Size),
             N_Preallocs     => 0,
-            Instance_Init   => Time_Picker_Init'Access,
+            Instance_Init   => Instance_Init'Access,
             Value_Table     => System.Null_Address);
 
          Text := ICS.New_String ("AdaTimePicker");
@@ -356,8 +388,8 @@ package body Ada_Widgets.Time_Picker.Implem is
       Child       : Gtk_Widget;
    begin
 
-      Ada_Log ("ada_widgets.time_picker.implem.build: " & ASCII.LF
-               & Blanks & "object=" & Type_Name (Get_Type (Object))
+      Ada_Log ("ada_widgets.time_picker.implem.build: "
+               & "object=" & Type_Name (Get_Type (Object))
                & " (" & To_Hex (Glib.Object.Get_Object (Object)'Image) & ")");
 
       --  1. Convert the Fake object to a Gtk Frame

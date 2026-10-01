@@ -107,9 +107,9 @@ Load_Time_CSS (void)
 void
 ada_widgets_time_picker_implem_build (GObject *object, gboolean show)
 {
-   Ada_Log ("ada_widgets_time_picker_implem.build: \n"
-                   "%sobject=%s (%p)",
-                   Blanks, G_OBJECT_TYPE_NAME (object), (void *)object);
+   Ada_Log ("ada_widgets_time_picker_implem.build: "
+           "object=%s (%p)",
+           G_OBJECT_TYPE_NAME (object), (void *)object);
 
   GtkFrame *frame = GTK_FRAME (object);
   gtk_frame_set_shadow_type (frame, GTK_SHADOW_NONE);
@@ -198,11 +198,6 @@ ada_widgets_time_picker_implem_set_property (GObject *object,
                                              const GValue *value,
                                              GParamSpec *pspec)
 {
-   Ada_Log ("ada_widgets_time_picker_implem_set_property "
-                   "object=%s (%p)"
-                   ", id=%u",
-                   G_OBJECT_TYPE_NAME (object), (void *)object,
-                   prop_id);
 
   switch (prop_id)
     {
@@ -212,6 +207,12 @@ ada_widgets_time_picker_implem_set_property (GObject *object,
 
         g_object_set_data (object, "ada-picker-time-zone",
                            GINT_TO_POINTER (tz));
+        Ada_Log ("ada_widgets_time_picker_implem_set_property: "
+                 "id=%s, value=%s"
+                 ", object=%s (%p)",
+                 ada_widgets_time_picker_time_zone_prop_to_string (prop_id),
+                 ada_widgets_time_picker_time_zone_to_string (tz),
+                 G_OBJECT_TYPE_NAME (object), (void *)object);
       }
       break;
     default:
@@ -227,11 +228,6 @@ ada_widgets_time_picker_implem_get_property (GObject *object,
                                              GValue *value,
                                              GParamSpec *pspec)
 {
-  Ada_Log ("ada_widgets_time_picker_implem_get_property "
-                   "object=%s (%p)"
-                   ", id=%u",
-                   G_OBJECT_TYPE_NAME (object), (void *)object,
-                   prop_id);
 
   switch (prop_id)
     {
@@ -240,6 +236,13 @@ ada_widgets_time_picker_implem_get_property (GObject *object,
         gpointer saved_tz = g_object_get_data (object, "ada-picker-time-zone");
         AdaTimeZone tz = saved_tz ? GPOINTER_TO_INT (saved_tz) : ADA_TIME_ZONE_UTC;
         g_value_set_enum (value, tz);
+
+        Ada_Log ("ada_widgets_time_picker_implem_get_property: "
+                 "id=%s, value=%s"
+                 ", object=%s (%p)",
+                 ada_widgets_time_picker_time_zone_prop_to_string (prop_id),
+                 ada_widgets_time_picker_time_zone_to_string (tz),
+                 G_OBJECT_TYPE_NAME (object), (void *)object);
       }
       break;
     default:
@@ -315,7 +318,7 @@ ada_widgets_time_picker_implem_time_zone_get_type (void)
           g_once_init_leave (&g_define_type_id__volatile, etype);
 
           Ada_Log (
-            "ada_widgets_time_picker_implem_time_zone_get_type, type=%s (%p)",
+            "ada_widgets_time_picker_implem_time_zone_get_type: type=%s (%p)",
             g_type_name (etype), (void *)etype);
         }
     }
@@ -330,32 +333,55 @@ ada_widgets_time_picker_implem_class_init (AdaTimePickerClass *klass)
   object_class->set_property = ada_widgets_time_picker_implem_set_property;
   object_class->get_property = ada_widgets_time_picker_implem_get_property;
 
-  Ada_Log ("ada_widgets_time_picker_implem_class_init"
-                   ", klass=%s (%p)",
+  Ada_Log ("ada_widgets_time_picker_implem_class_init: "
+                   "class=%s (%p)",
                    G_OBJECT_CLASS_NAME (klass), (void *)klass);
 
   g_object_class_install_property (
     object_class, PROP_TIME_ZONE,
-    g_param_spec_enum (
-      "time-zone", "Time Zone",
-      "Default time zone for the time picker (e.g., UTC, CET, EST).",
-      ada_widgets_time_picker_implem_time_zone_get_type (),
-      ADA_TIME_ZONE_UTC,
-      G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+    g_param_spec_enum ("time-zone", "Time Zone",
+                       "Time zone of the time picker (e.g., UTC, CET, EST ...)",
+                       ada_widgets_time_picker_implem_time_zone_get_type (),
+                       ADA_TIME_ZONE_UTC,
+                       G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+
+  guint n_properties = 0;
+  gboolean found =FALSE;
+  GParamSpec **properties = g_object_class_list_properties (object_class, &n_properties);
+
+  for (guint i = 0; i < n_properties; i++)
+    {
+      GParamSpec *pspec = properties[i];
+      if (pspec->owner_type == G_OBJECT_CLASS_TYPE (klass))
+        {
+          if (!found)
+            {
+              found = TRUE;
+              Ada_Log ("ada_widgets_time_picker_class_init: own properties:");
+            }
+          Ada_Log ("%s%s", Blanks, g_param_spec_get_name (pspec));
+        }
+    }
+  if (!found)
+    Ada_Log ("ada_widgets_time_picker_class_init: no own properties");
+  g_free (properties);
 }
 
 /*----------------------------------------------------------------------------*/
 G_MODULE_EXPORT void
-ada_widgets_time_picker_implem_init (GObject *object)
+ada_widgets_time_picker_implem_instance_init (GObject *object,
+                                              GObjectClass *class)
 {
-  Ada_Log ("ada_widgets_time_picker_implem_init:"
-                   "object=%s (%p)",
-                   G_OBJECT_TYPE_NAME (object), (void *)object);
+  Ada_Log ("ada_widgets_time_picker_implem_instance_init: "
+           "object=%s (%p)"
+           ", class=%s (%p)",
+           G_OBJECT_TYPE_NAME (object), (void *)object,
+           G_OBJECT_CLASS_NAME (class), (void *)class);
   ada_widgets_time_picker_implem_build (object, TRUE);
 }
 
 /*----------------------------------------------------------------------------*/
-G_MODULE_EXPORT GType
+GType
 ada_widgets_time_picker_implem_get_type (void)
 {
   static volatile gsize g_define_type_id__volatile = 0;
@@ -366,15 +392,15 @@ ada_widgets_time_picker_implem_get_type (void)
       if (G_UNLIKELY (type == 0))
         {
           const GTypeInfo info = { sizeof (AdaTimePickerClass),
-                                   (GBaseInitFunc)NULL,
-                                   (GBaseFinalizeFunc)NULL,
-                                   (GClassInitFunc)ada_widgets_time_picker_implem_class_init,
-                                   (GClassFinalizeFunc)NULL,
-                                   NULL,
-                                   sizeof (AdaTimePicker),
-                                   0,
-                                   (GInstanceInitFunc)ada_widgets_time_picker_implem_init,
-                                   NULL };
+                (GBaseInitFunc)NULL,
+                (GBaseFinalizeFunc)NULL,
+                (GClassInitFunc)ada_widgets_time_picker_implem_class_init,
+                (GClassFinalizeFunc)NULL,
+                NULL,
+                sizeof (AdaTimePicker),
+                0,
+                (GInstanceInitFunc)ada_widgets_time_picker_implem_instance_init,
+                NULL };
           type = g_type_register_static (GTK_TYPE_FRAME,
                                          "AdaTimePicker",
                                          &info,
@@ -382,7 +408,7 @@ ada_widgets_time_picker_implem_get_type (void)
 
           g_once_init_leave (&g_define_type_id__volatile, type);
 
-          Ada_Log ("ada_widgets_time_picker_implem_get_type, type=%s (%p)",
+          Ada_Log ("ada_widgets_time_picker_implem_get_type_ type=%s (%p)",
                    g_type_name (type), (void *)type);
         }
     }

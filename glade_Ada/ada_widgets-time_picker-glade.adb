@@ -46,7 +46,7 @@ package body Ada_Widgets.Time_Picker.Glade is
                   & "(" & To_Hex (Object'Image) & ")");
 
          Ada_Widgets.Time_Picker.Implem.Set_Property
-           (Object        => Get_User_Data (-Object, Stub),
+           (Object        => Object,
             Prop_Id       => Prop_Id,
             Value         => Value_Access.all,
             Property_Spec => Prop_Spec);
@@ -54,6 +54,12 @@ package body Ada_Widgets.Time_Picker.Glade is
       end if;
 
       --  general case
+      --  Ada_Log ("ada_widgets.time_picker.glade.set_property: "
+      --           & "Id=" & Id_Str & ASCII.LF
+      --           & Blanks & "adaptor=" & Value (Get_Name (Adtor))
+      --           & " (" & To_Hex (Adtor'Image) & ")" & ASCII.LF
+      --           & Blanks & "object=" & Type_Name (Get_Type (Get_User_Data (-Object, Stub)))
+      --           & " (" & To_Hex (Object'Image) & ")");
       declare
          Parent_Adtor       : Adaptor;
          Parent_Adtor_Class : Adaptor_Class;
@@ -93,7 +99,7 @@ package body Ada_Widgets.Time_Picker.Glade is
                   & "(" & To_Hex (Object'Image) & ")");
 
          Ada_Widgets.Time_Picker.Implem.Get_Property
-           (Object        => Get_User_Data (-Object, Stub),
+           (Object        => Object,
             Prop_Id       => Prop_Id,
             Value         => Value_Access.all,
             Property_Spec => Prop_Spec);
@@ -101,6 +107,12 @@ package body Ada_Widgets.Time_Picker.Glade is
       end if;
 
       --  general case
+      --  Ada_Log ("ada_widgets.time_picker.glade.get_property: "
+      --           & "Id=" & Id_Str & ASCII.LF
+      --           & Blanks & "adaptor=" & Value (Get_Name (Adtor))
+      --           & " (" & To_Hex (Adtor'Image) & ")" & ASCII.LF
+      --           & Blanks & "object=" & Type_Name (Get_Type (Get_User_Data (-Object, Stub)))
+      --           & " (" & To_Hex (Object'Image) & ")");
       declare
          Parent_Adtor       : Adaptor;
          Parent_Adtor_Class : Adaptor_Class;
@@ -133,10 +145,13 @@ package body Ada_Widgets.Time_Picker.Glade is
                & " (" & To_Hex (Object'Image) & ")" & ASCII.LF
                & Blanks & "reason=" & Reason'Image);
 
-      Glade_Binding.Widget.Push_Superuser;
-      Ada_Widgets.Time_Picker.Implem.Build (Object => Get_User_Data (-Object, Stub),
+      if Reason = Glade_Create_Load or Reason = Glade_Create_User or Reason = Glade_Create_Copy
+      then
+         Glade_Binding.Widget.Push_Superuser;
+         Ada_Widgets.Time_Picker.Implem.Build (Object => Get_User_Data (-Object, Stub),
                                             Show   => True);
-      Glade_Binding.Widget.Pop_Superuser;
+         Glade_Binding.Widget.Pop_Superuser;
+      end if;
 
    end Post_Create;
 

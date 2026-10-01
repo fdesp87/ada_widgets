@@ -18,4 +18,16 @@
 
 package body Ada_Widgets.Date_Picker is
 
+   function Prop_To_String (I : Property_Id) return String is
+   begin
+      case I is
+         when PROP_MIN_DATE =>
+            return "PROP_MIN_DATE";
+         when PROP_MAX_DATE =>
+            return "PROP_MAX_DATE";
+         when others =>
+            return "PROP_???";
+      end case;
+   end Prop_To_String;
+
 end Ada_Widgets.Date_Picker;

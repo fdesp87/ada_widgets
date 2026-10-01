@@ -25,11 +25,11 @@ with Ada.Unchecked_Conversion;
 with Glib;
 with Glib.Object;                   use Glib.Object;
 with Glib.Values;                   use Glib.Values;
+with Glib_Additions;                use Glib_Additions;
 with Gtk.Widget;                    use Gtk.Widget;
 with Gtk.GEntry;                    use Gtk.GEntry;
 with Gdk.Event;                     use Gdk.Event;
 with Gtk.Handlers;
-with Gtk_Additions;                 use Gtk_Additions;
 
 with Glade_Binding;                 use Glade_Binding;
 with Glade_Binding.Widget;          use Glade_Binding.Widget;
@@ -210,7 +210,7 @@ package body Ada_Widgets.Date_Picker.Editor is
          begin
             Is_Target_Prop := (Id = "min-date" or else Id = "max-date");
             if Is_Target_Prop then
-               Ada_Log ("Ada_Widgets.Date_Picker.Editor.Load_Impl [" & Id & "]" & ASCII.LF
+               Ada_Log ("Ada_Widgets.Date_Picker.Editor.Eprop_Load [" & Id & "]" & ASCII.LF
                         & Blanks & "Eprop=" & To_Hex (Eprop'Image) & ASCII.LF
                         & Blanks & "Prop="
                         & (if Prop = null then "null" else To_Hex (Prop'Image))
@@ -242,11 +242,10 @@ package body Ada_Widgets.Date_Picker.Editor is
       end if;
 
       if Is_Target_Prop then
-         Ada_Log ("Ada_Widgets.Date_Picker.Editor.Load_Impl: loading text="""
+         Ada_Log ("Ada_Widgets.Date_Picker.Editor.Eprop_Load: loading text="
                   & (if Text /= ICS.Null_Ptr
                     then ICS.Value (Text)
-                    else "(null)")
-                  & """");
+                    else "(null)"));
       end if;
 
       if Text /= ICS.Null_Ptr then
@@ -472,6 +471,8 @@ package body Ada_Widgets.Date_Picker.Editor is
                Ada_Log ("Ada_Widgets.Date_Picker.Editor."
                         & "Glade_Ada_Date_Picker_Create_Eprop "
                         & "[" & ICS.Value (Prop_Id) & "]" & ASCII.LF
+                        & Blanks & "adaptor=" & ICS.Value (Get_Name (Adtor))
+                        & " (" & To_Hex (Adtor'Image) & ")" & ASCII.LF
                         & Blanks & "Eprop=" & To_Hex (Eprop'Image) & ASCII.LF
                         & Blanks & "Def.all="
                         & (if Def = null

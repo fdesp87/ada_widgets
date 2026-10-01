@@ -99,9 +99,9 @@ void
 ada_widgets_date_picker_implem_build (GObject *object,
                                       gboolean show)
 {
-  Ada_Log ("ada_widgets_date_picker_implem.build: \n"
-                   "%sobject=%s (%p)",
-                   Blanks, G_OBJECT_TYPE_NAME (object), (void *)object);
+  Ada_Log ("ada_widgets_date_picker_implem.build: "
+           "object=%s (%p)",
+           G_OBJECT_TYPE_NAME (object), (void *)object);
 
   GtkFrame *frame = GTK_FRAME (object);
   gtk_frame_set_shadow_type (frame, GTK_SHADOW_NONE);
@@ -210,11 +210,12 @@ ada_widgets_date_picker_implem_set_property (GObject *object,
         g_object_set_data_full (object, data_key,
                                 g_strdup (g_value_get_string (value)),
                                 (GDestroyNotify)g_free);
-        Ada_Log ("ada_widgets_date_picker_implem_set_property "
-                         "id=%u, value=%s"
-                         ", object=%s (0x%016lx)",
-                         prop_id, value_str ? value_str : "(null)",
-                         G_OBJECT_TYPE_NAME (object), (void *)object);
+        Ada_Log ("ada_widgets_date_picker_implem_set_property: "
+                 "id=%s, value=%s"
+                 ", object=%s (%p)",
+                 ada_widgets_date_picker_prop_to_string (prop_id),
+                 value_str ? value_str : "(null)",
+                 G_OBJECT_TYPE_NAME (object), (void *)object);
       }
       break;
     default:
@@ -243,12 +244,11 @@ ada_widgets_date_picker_implem_get_property (GObject *object,
         const gchar *saved_date = g_object_get_data (object, data_key);
         const gchar *default_val = (prop_id == PROP_MIN_DATE) ? "1901-01-01" : "2399-12-31";
         const gchar *val_to_return = saved_date ? saved_date : default_val;
-        Ada_Log ("ada_widgets_date_picker_implem_get_property "
-                         "prop_id=%u, value=%s"
-                         ", object=%s (0x%016lx)",
-                         prop_id, val_to_return,
-                         G_OBJECT_TYPE_NAME (object),
-                         (void *)object);
+        Ada_Log ("ada_widgets_date_picker_implem_get_property: "
+                 "prop_id=%s, value=%s"
+                 ", object=%s (%p)",
+                 ada_widgets_date_picker_prop_to_string (prop_id),
+                 val_to_return, G_OBJECT_TYPE_NAME (object), (void *)object);
 
         g_value_set_string (value, val_to_return);
       }
@@ -263,15 +263,13 @@ ada_widgets_date_picker_implem_get_property (GObject *object,
 static void
 ada_widgets_date_picker_class_init (AdaDatePickerClass *klass)
 {
-  Ada_Log ("ada_widgets_date_picker_class_init"
-                   ", klass=%s (%p)",
+  Ada_Log ("ada_widgets_date_picker_class_init: "
+                   "class=%s (%p)",
                    G_OBJECT_CLASS_NAME (klass), (void *)klass);
 
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   object_class->set_property = ada_widgets_date_picker_implem_set_property;
   object_class->get_property = ada_widgets_date_picker_implem_get_property;
-
-  Ada_Log ("object class record size=%s", sizeof (*object_class));
 
   g_object_class_install_property (
       object_class,
@@ -283,29 +281,52 @@ ada_widgets_date_picker_class_init (AdaDatePickerClass *klass)
                            G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 
   g_object_class_install_property (
-      object_class,
-      PROP_MAX_DATE,
-      g_param_spec_string ("max-date",
-                           "Maximum Date",
-                           "Maximum allowed date format: YYYY-MM-DD",
-                           "2399-12-31",
-                           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+    object_class, PROP_MAX_DATE,
+    g_param_spec_string (
+      "max-date", "Maximum Date", "Maximum allowed date format: YYYY-MM-DD",
+      "2399-12-31", G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+
+  guint n_properties = 0;
+  gboolean found =FALSE;
+  GParamSpec **properties = g_object_class_list_properties (object_class, &n_properties);
+
+  for (guint i = 0; i < n_properties; i++)
+    {
+      GParamSpec *pspec = properties[i];
+      if (pspec->owner_type == G_OBJECT_CLASS_TYPE (klass))
+        {
+          if (!found)
+            {
+              found = TRUE;
+              Ada_Log ("ada_widgets_date_picker_class_init: own properties:");
+            }
+          Ada_Log ("%s%s", Blanks, g_param_spec_get_name (pspec));
+        }
+    }
+  if (!found)
+    Ada_Log ("ada_widgets_date_picker_class_init: no own properties");
+
+  g_free (properties);
 }
 
 /*----------------------------------------------------------------------------*/
 G_MODULE_EXPORT void
-ada_widgets_date_picker_init (GObject *object)
+ada_widgets_date_picker_instance_init (GObject *object,
+                                       GObjectClass *class)
 {
-  Ada_Log ("ada_widgets_date_picker_implem_init:"
-                   "object=%s (0x%016lx)",
-                   G_OBJECT_TYPE_NAME (object), (void *)object);
+  Ada_Log ("ada_widgets_date_picker_implem_instance_init: "
+           "object=%s (%p)"
+           ", class=%s (%p)",
+           G_OBJECT_TYPE_NAME (object), (void *)object,
+           G_OBJECT_CLASS_NAME (class), (void *)class);
+
   ada_widgets_date_picker_implem_build (object, TRUE);
 }
 
 /*----------------------------------------------------------------------------*/
 /* GET TYPE                                                                   */
 /*----------------------------------------------------------------------------*/
-G_MODULE_EXPORT GType
+GType
 ada_widgets_date_picker_implem_get_type (void)
 {
   static volatile gsize g_define_type_id__volatile = 0;
@@ -316,20 +337,20 @@ ada_widgets_date_picker_implem_get_type (void)
       if (G_UNLIKELY (type == 0))
         {
           const GTypeInfo info = { sizeof (AdaDatePickerClass),
-                                   (GBaseInitFunc)NULL,
-                                   (GBaseFinalizeFunc)NULL,
-                                   (GClassInitFunc)ada_widgets_date_picker_class_init,
-                                   (GClassFinalizeFunc)NULL,
-                                   NULL,
-                                   sizeof (AdaDatePicker),
-                                   0,
-                                   (GInstanceInitFunc)ada_widgets_date_picker_init,
-                                   NULL };
+                (GBaseInitFunc)NULL,
+                (GBaseFinalizeFunc)NULL,
+                (GClassInitFunc)ada_widgets_date_picker_class_init,
+                (GClassFinalizeFunc)NULL,
+                NULL,
+                sizeof (AdaDatePicker),
+                0,
+                (GInstanceInitFunc)ada_widgets_date_picker_instance_init,
+                NULL };
           type = g_type_register_static (GTK_TYPE_FRAME, "AdaDatePicker", &info,
                                          0);
           g_once_init_leave (&g_define_type_id__volatile, type);
 
-          Ada_Log ("ada_widgets_date_picker_get_type, type=%s (%p)",
+          Ada_Log ("ada_widgets_date_picker_implem_get_type: type=%s (%p)",
                    g_type_name (type), type);
         }
     }

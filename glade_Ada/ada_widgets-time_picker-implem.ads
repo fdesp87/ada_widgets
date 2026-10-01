@@ -15,11 +15,12 @@
 --  the GNU Lesser General Public License along with this program; see files --
 --  LICENSE.GLP and LICENSE.LGPL. If not, see <http:--www.gnu.org-licenses-> --                              --
 -------------------------------------------------------------------------------
-with Glib;                use Glib;
-with Glib.Object;         use Glib.Object;
+with Glib;                     use Glib;
+with Glib.Object;              use Glib.Object;
 with Glib.Values;
 with Glib.Properties;
 with Glib.Properties.Creation; use Glib.Properties.Creation;
+with Glib_Additions;           use Glib_Additions;
 
 with Gtk.Frame;         use Gtk.Frame;
 
@@ -66,7 +67,7 @@ package Ada_Widgets.Time_Picker.Implem is
    -------------------------------------------
    --  SET PROPERTY                         --
    -------------------------------------------
-   procedure Set_Property (Object        : access Glib.Object.GObject_Record'Class;
+   procedure Set_Property (Object        : GObject_Ptr;
                            Prop_Id       : Property_Id;
                            Value         : Glib.Values.GValue;
                            Property_Spec : Param_Spec);
@@ -74,7 +75,7 @@ package Ada_Widgets.Time_Picker.Implem is
    -------------------------------------------
    --  GET PROPERTY                         --
    -------------------------------------------
-   procedure Get_Property (Object        : access Glib.Object.GObject_Record'Class;
+   procedure Get_Property (Object        : GObject_Ptr;
                            Prop_Id       : Property_Id;
                            Value         : out Glib.Values.GValue;
                            Property_Spec : Param_Spec);

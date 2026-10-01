@@ -20,6 +20,16 @@
 #include "ada_widgets_date_picker_implem.h"
 
 /*----------------------------------------------------------------------------*/
+/* GET TYPE                                                                   */
+/*----------------------------------------------------------------------------*/
+G_MODULE_EXPORT GType
+ada_widgets_date_picker_glade_get_type (void)
+{
+  Ada_Log ("ada_widgets_date_picker_glade_get_type");
+  ada_widgets_date_picker_implem_get_type();
+}
+
+/*----------------------------------------------------------------------------*/
 /* POST CREATE                                                                */
 /*----------------------------------------------------------------------------*/
 G_MODULE_EXPORT void
@@ -28,17 +38,20 @@ ada_widgets_date_picker_glade_post_create (GladeWidgetAdaptor *adaptor,
                                            GladeCreateReason reason)
 {
   Ada_Log ("glade_ada_widgets_date_picker_glade_post_create:\n"
-                   "%sadaptor=%s (%p),\n"
-                   "%sobject=%s (%p),\n"
-                   "%sreason=%d",
-                   Blanks, glade_widget_adaptor_get_name (adaptor), (void *)adaptor,
-                   Blanks, G_OBJECT_TYPE_NAME (object), (void *)object,
-                   Blanks, (int)reason);
-
-  glade_widget_push_superuser ();
-  ada_widgets_date_picker_implem_build (object, FALSE);
-  glade_widget_pop_superuser ();
- }
+           "%sadaptor=%s (%p)\n"
+           "%sobject=%s (%p)\n"
+           "%sreason=%d",
+           Blanks, glade_widget_adaptor_get_name (adaptor), (void *)adaptor,
+           Blanks, G_OBJECT_TYPE_NAME (object), (void *)object, Blanks,
+           (int)reason);
+  if ((reason = GLADE_CREATE_LOAD) || (reason = GLADE_CREATE_COPY)
+        || (reason = GLADE_CREATE_USER))
+    {
+      glade_widget_push_superuser ();
+      ada_widgets_date_picker_implem_build (object, FALSE);
+      glade_widget_pop_superuser ();
+    }
+}
 
 /*----------------------------------------------------------------------------*/
 /* SET PROPERTY                                                               */
@@ -49,7 +62,8 @@ ada_widgets_date_picker_glade_post_create (GladeWidgetAdaptor *adaptor,
                                              const gchar *id,
                                              const GValue *value)
  {
-  if (g_strcmp0 (id, "min-date") == 0 || g_strcmp0 (id, "max-date") == 0)
+
+   if (g_strcmp0 (id, "min-date") == 0 || g_strcmp0 (id, "max-date") == 0)
     {
       const gchar *value_str = g_value_get_string (value);
       const gchar *new_date = value_str;
@@ -65,13 +79,19 @@ ada_widgets_date_picker_glade_post_create (GladeWidgetAdaptor *adaptor,
                               (GDestroyNotify)g_free);
 
       Ada_Log ("ada_widgets_date_picker_glade_set_property "
-                       "id=%s, value=%s"
-                       ", object=%s (0x%016lx)",
-                       id, value_str ? value_str : "(null)",
-                       G_OBJECT_TYPE_NAME (object), (void *)object);
+               "id=%s, value=%s\n"
+               "%sobject=%s (%p)", id, value_str ? value_str : "(null)",
+               Blanks, G_OBJECT_TYPE_NAME (object), (void *)object);
     }
   else
     {
+      // Ada_Log ("ada_widgets_date_picker_glade_set_property "
+      //          "id=%s\n"
+      //          "%sadaptor=%s (%p)\n"
+      //          "%sobject=%s (%p)",
+      //          id,
+      //          Blanks, glade_widget_adaptor_get_name (adaptor), (void *)adaptor,
+      //          Blanks, G_OBJECT_TYPE_NAME (object), (void *)object);
 
       GladeWidgetAdaptor *parent_adaptor
         = glade_widget_adaptor_get_parent_adaptor (adaptor);
@@ -109,15 +129,22 @@ ada_widgets_date_picker_glade_get_property (GladeWidgetAdaptor *adaptor,
 
       Ada_Log ("glade_ada_widgets_date_picker_glade_get_property "
                        "id=%s, value=%s"
-                       ", object=%s (0x%016lx)",
+                       ", object=%s (%p)",
                        id, val_to_return,
-                       G_OBJECT_TYPE_NAME (object),
-                       (void *)object);
+                       G_OBJECT_TYPE_NAME (object), (void *)object);
 
       g_value_set_string (value, val_to_return);
     }
   else
     {
+      // Ada_Log ("glade_ada_widgets_date_picker_glade_get_property "
+      //                  "id=%s",
+      //                  "%sadaptor=%s (%p)\n",
+      //                  "%sobject=%s (%p)",
+      //                  id,
+      //                  Blanks, glade_widget_adaptor_get_name (adaptor), (void *)adaptor,
+      //                  G_OBJECT_TYPE_NAME (object), (void *)object);
+
       GladeWidgetAdaptor *parent_adaptor
         = glade_widget_adaptor_get_parent_adaptor (adaptor);
       if (parent_adaptor)

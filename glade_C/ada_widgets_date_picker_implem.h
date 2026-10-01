@@ -39,10 +39,8 @@ struct _AdaDatePickerClass
 /*----------------------------------------------------------------------------*/
 /* GET TYPE                                                                   */
 /*----------------------------------------------------------------------------*/
-G_MODULE_EXPORT GType
-ada_widgets_date_picker_implem_get_type (void)
-  __asm__ ("ada_date_picker_get_type");
-// Note: It is mandatory to keep the exported symbol as it is
+GType
+ada_widgets_date_picker_implem_get_type (void);
 
 /*----------------------------------------------------------------------------*/
 /* BUILD                                                                      */

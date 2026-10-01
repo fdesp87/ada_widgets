@@ -175,7 +175,7 @@ ada_widgets_date_picker_editor_eprop_load (
       if (is_target_prop)
         {
           Ada_Log (
-            "ada_widgets_date_picker_editor_load [%s]\n"
+            "ada_widgets_date_picker_editor_eprop_load [%s]\n"
             "%seprop=%p\n"
             "%sprop=%p\n"
             "%sparent_class %p\n"
@@ -211,10 +211,10 @@ ada_widgets_date_picker_editor_eprop_load (
 
   if (is_target_prop)
     {
-      Ada_Log ("glade_eprop_datepicker_load [%s]:\n"
-                       "%sloading text=\"%s\"",
+      Ada_Log ("ada_widgets_date_picker_editor_eprop_load [%s]: "
+                       "loading text=%s",
                        prop_id,
-                       Blanks, text ? text : "(null)");
+                       text ? text : "(null)");
     }
 
   gtk_entry_set_text (GTK_ENTRY (entry), text != NULL ? text : "");

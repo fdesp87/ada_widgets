@@ -23,6 +23,8 @@ with Interfaces.C.Extensions;  use Interfaces.C.Extensions;
 
 with Glib.Values;
 with Glib;
+with Glib_Additions;           use Glib_Additions;
+
 with Gdk.Event;
 with Gtk.Tree_Model;
 
@@ -30,10 +32,11 @@ limited with Glade_Binding.Properties;
 limited with Glade_Binding.Widget_Adaptor;
 limited with Glade_Binding.Editor_Property;
 
+
 package Glade_Binding.Widget is
 
    type Glade_Widget_Record is record
-      Parent_Instance : GObject_C_Block;
+      Parent_Instance : GObject_Block;
       Priv            : System.Address;
    end record;
    pragma Convention (C, Glade_Widget_Record);
@@ -240,11 +243,11 @@ package Glade_Binding.Widget is
    pragma Import (C, Get_Pack_Property, "glade_widget_get_pack_property");
 
    function Dup_Properties
-     (Dest_Widget      : Glade_Widget;
-      Template_Props   : GList_Ptr;
-      As_Load          : Extensions.bool;
-      Copy_Parentless   : Extensions.bool;
-      Exact             : Extensions.bool) return GList_Ptr;
+     (Dest_Widget     : Glade_Widget;
+      Template_Props  : GList_Ptr;
+      As_Load         : Extensions.bool;
+      Copy_Parentless : Extensions.bool;
+      Exact           : Extensions.bool) return GList_Ptr;
    pragma Import (C, Dup_Properties, "glade_widget_dup_properties");
 
    procedure Remove_Property (Widget      : Glade_Widget;

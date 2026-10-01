@@ -17,10 +17,12 @@
 -------------------------------------------------------------------------------
 with Glib;                     use Glib;
 with Glib.Values;              use Glib.Values;
+with Glib_Additions;           use Glib_Additions;
 with Interfaces.C.Strings;     use Interfaces.C.Strings;
 
 with Glade_Binding;                use Glade_Binding;
 with Glade_Binding.Widget_Adaptor; use Glade_Binding.Widget_Adaptor;
+
 
 package Ada_Widgets.Date_Picker.Glade is
    pragma Warnings (Off, "involves a tagged type which does not correspond to any C type");

@@ -18,13 +18,14 @@
 --  This binding is based on glade-3.40, licensed under GNU GPL version 2    --
 -------------------------------------------------------------------------------
 with System;
-with Interfaces.C;            use Interfaces.C;
-with Interfaces.C.Strings;    use Interfaces.C.Strings;
-with Interfaces.C.Extensions; use Interfaces.C.Extensions;
+with Interfaces.C;                      use Interfaces.C;
+with Interfaces.C.Strings;              use Interfaces.C.Strings;
+with Interfaces.C.Extensions;           use Interfaces.C.Extensions;
 
 with Glib;
 with Glib.Values;
 with Glib.Module;
+with Glib_Additions;                    use Glib_Additions;
 
 with Glade_Binding.Widget;
 with Glade_Binding.Property_Definition; use Glade_Binding.Property_Definition;
@@ -75,14 +76,14 @@ package Glade_Binding.Widget_Adaptor is
 
    type Glade_Set_Property_Func is access procedure
      (Adtor         : Adaptor;
-      Object        : GObject_Ptr;
+      Object        : Glib_Additions.GObject_Ptr;
       Property_Name : chars_ptr;
       Value         : access Glib.Values.GValue);
    pragma Convention (C, Glade_Set_Property_Func);
 
    type Glade_Get_Property_Func is access procedure
      (Adtor         : Adaptor;
-      Object        : GObject_Ptr;
+      Object        : Glib_Additions.GObject_Ptr;
       Property_Name : chars_ptr;
       Value         : access Glib.Values.GValue);
    pragma Convention (C, Glade_Get_Property_Func);

@@ -22,9 +22,11 @@
 
 enum
 {
-  PROP_0,
-  PROP_MIN_DATE,
+  PROP_MIN_DATE = 1,
   PROP_MAX_DATE
 };
+
+const char *
+ada_widgets_date_picker_prop_to_string (gint id);
 
 #endif /* ADA_DATE_PICKER_H */

@@ -17,5 +17,14 @@
 -------------------------------------------------------------------------------
 package body Ada_Widgets.Time_Picker is
 
+   function Prop_To_String (I : Property_Id) return String is
+   begin
+      case I is
+         when PROP_TIME_ZONE =>
+            return "PROP_TIME_ZONE";
+         when others =>
+            return "PROP_???";
+      end case;
+   end Prop_To_String;
 
 end Ada_Widgets.Time_Picker;
