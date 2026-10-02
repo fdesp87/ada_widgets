@@ -18,8 +18,8 @@
 with System;
 with Interfaces.C;
 with Interfaces.C.Strings;
-
-with Glib.Error;
+with Ada.Calendar;
+with GNAT.Calendar.Time_IO;      use GNAT.Calendar.Time_IO;
 
 with Gtk.Enums;
 with Gtk.Image;
@@ -34,10 +34,16 @@ with Gtk.Style_Context;
 with Gdk.Screen;
 with Gtk.Handlers;
 with Gtkada.Dialogs;             use Gtkada.Dialogs;
-with Glib.Type_Conversion_Hooks;
-with Ada_Widgets.Date_Picker.Validation;
-with Gtk.Container.Additions;              use Gtk.Container.Additions;
+with Gtk.Container.Additions;    use Gtk.Container.Additions;
 
+with Glib.Values;
+with Glib.Additions;             use Glib.Additions;
+with Glib.Properties;
+with Glib.Properties.Creation;   use Glib.Properties.Creation;
+with Glib.Error;
+with Glib.Type_Conversion_Hooks;
+
+with Ada_Widgets.Date_Picker.Validation;
 
 package body Ada_Widgets.Date_Picker.Implem is
 
@@ -62,6 +68,10 @@ package body Ada_Widgets.Date_Picker.Implem is
    -------------------------------------------
    --  SET PROPERTY                         --
    -------------------------------------------
+   procedure Set_Property (Object        : GObject_Ptr;
+                           Prop_Id       : Property_Id;
+                           Value         : Glib.Values.GValue;
+                           Property_Spec : Param_Spec);
    procedure Set_Property (Object        : GObject_Ptr;
                            Prop_Id       : Property_Id;
                            Value         : Glib.Values.GValue;
@@ -125,6 +135,10 @@ package body Ada_Widgets.Date_Picker.Implem is
    procedure Get_Property (Object        : GObject_Ptr;
                            Prop_Id       : Property_Id;
                            Value         : out Glib.Values.GValue;
+                           Property_Spec : Param_Spec);
+   procedure Get_Property (Object        : GObject_Ptr;
+                           Prop_Id       : Property_Id;
+                           Value         : out Glib.Values.GValue;
                            Property_Spec : Param_Spec) is
       pragma Unreferenced (Property_Spec);
       Stub : GObject_Record;
@@ -167,72 +181,17 @@ package body Ada_Widgets.Date_Picker.Implem is
       end case;
    end Get_Property;
 
-   -----------------------------------------------------------------------------
+   -------------------------------------------
+   --  TYPE CONVERSION HOOK                 --
+   -------------------------------------------
    package Type_Conversion_Ada_Date_Picker is
      new Glib.Type_Conversion_Hooks.Hook_Registrator
        (Ada_Widgets.Date_Picker.Implem.Get_Type'Access, Ada_Date_Picker_Record);
    pragma Unreferenced (Type_Conversion_Ada_Date_Picker);
 
    -------------------------------------------
-   --  LOAD DATE CSS                        --
+   --  CLASS INIT                           --
    -------------------------------------------
-   Css_Date_Loaded : Boolean := False;
-
-   procedure Load_Date_CSS;
-   procedure Load_Date_CSS is
-      DatePicker_CSS : constant String :=
-                         "box#Date_Picker_HBox {"
-                         & "    border-style: none;"
-                         & "    background-color: transparent;"
-                         & "}"
-                         & "entry#Date_Picker_Year_Entry,"
-                         & "entry#Date_Picker_Month_Entry,"
-                         & "entry#Date_Picker_Day_Entry {"
-                         & "    padding-top: 2px;"
-                         & "    padding-bottom: 2px;"
-                         & "    min-height: 22px;"
-                         & "    border-radius: 0px;"
-                         & "    margin-right: -1px;"
-                         & "}"
-                         & "button#Date_Picker_Button {"
-                         & "    padding-top: 0px;"
-                         & "    padding-bottom: 0px;"
-                         & "    min-height: 22px;"
-                         & "    border-radius: 0px;"
-                         & "}";
-
-      Provider : Gtk_Css_Provider;
-      Error    : aliased Glib.Error.GError;
-      Success  : Boolean;
-   begin
-      if Css_Date_Loaded then
-         return;
-      end if;
-
-      Ada_Log ("ada_widgets.date_picker.implem.load_date_css");
-
-      Gtk_New (Provider);
-
-      Success := Provider.Load_From_Data (DatePicker_CSS, Error'Access);
-      if not Success then
-         Ada_Log ("ada_widgets.date_picker.implem.load_date_css: error"
-                  & Error.Get_Message);
-         Glib.Error.Error_Free (Error);
-         Unref (Provider);
-         return;
-      end if;
-
-      Gtk.Style_Context.Add_Provider_For_Screen
-        (Screen   => Gdk.Screen.Get_Default,
-         Provider => +Provider,
-         Priority => Gtk.Style_Provider.Priority_Application);
-
-      Unref (Provider);
-      Css_Date_Loaded := True;
-   end Load_Date_CSS;
-
-   -----------------------------------------------------------------------------
-   --  Klass : aliased Glib.Object.Ada_GObject_Class := Glib.Object.Uninitialized_Class;
    Klass : Glib.GType := Glib.GType_None;
 
    procedure Class_Init (Self : GObject_Class);
@@ -292,10 +251,13 @@ package body Ada_Widgets.Date_Picker.Implem is
       end;
    end Class_Init;
 
-   -----------------------------------------------------------------------------
+   -------------------------------------------
+   --  INSTANCE INIT                        --
+   -------------------------------------------
    procedure Instance_Init (Object : GObject_Ptr;
                             GClass : GObject_Class);
    pragma Convention (C, Instance_Init);
+
    procedure Instance_Init (Object : GObject_Ptr;
                             GClass : GObject_Class) is
       Class_Ptr : constant GObject_Class_Ptr := -GClass;
@@ -353,7 +315,9 @@ package body Ada_Widgets.Date_Picker.Implem is
       return Klass;
    end Get_Type;
 
-   -----------------------------------------------------------------------------
+   -----------------------------------
+   --  CALENDAR BUTTON HANDLER      --
+   -----------------------------------
    procedure On_Calendar_Button_Clicked
      (Some_Button : access Gtk.Button.Gtk_Button_Record'Class;
       User_Data   : GObject);
@@ -375,6 +339,64 @@ package body Ada_Widgets.Date_Picker.Implem is
    end On_Calendar_Button_Clicked;
 
    -------------------------------------------
+   --  CSS LOAD                         --
+   -------------------------------------------
+   Css_Date_Loaded : Boolean := False;
+
+   procedure Load_Date_CSS;
+   procedure Load_Date_CSS is
+      DatePicker_CSS : constant String :=
+                         "box#Date_Picker_HBox {"
+                         & "    border-style: none;"
+                         & "    background-color: transparent;"
+                         & "}"
+                         & "entry#Date_Picker_Year_Entry,"
+                         & "entry#Date_Picker_Month_Entry,"
+                         & "entry#Date_Picker_Day_Entry {"
+                         & "    padding-top: 2px;"
+                         & "    padding-bottom: 2px;"
+                         & "    min-height: 22px;"
+                         & "    border-radius: 0px;"
+                         & "    margin-right: -1px;"
+                         & "}"
+                         & "button#Date_Picker_Button {"
+                         & "    padding-top: 0px;"
+                         & "    padding-bottom: 0px;"
+                         & "    min-height: 22px;"
+                         & "    border-radius: 0px;"
+                         & "}";
+
+      Provider : Gtk_Css_Provider;
+      Error    : aliased Glib.Error.GError;
+      Success  : Boolean;
+   begin
+      if Css_Date_Loaded then
+         return;
+      end if;
+
+      Ada_Log ("ada_widgets.date_picker.implem.load_date_css");
+
+      Gtk_New (Provider);
+
+      Success := Provider.Load_From_Data (DatePicker_CSS, Error'Access);
+      if not Success then
+         Ada_Log ("ada_widgets.date_picker.implem.load_date_css: error"
+                  & Error.Get_Message);
+         Glib.Error.Error_Free (Error);
+         Unref (Provider);
+         return;
+      end if;
+
+      Gtk.Style_Context.Add_Provider_For_Screen
+        (Screen   => Gdk.Screen.Get_Default,
+         Provider => +Provider,
+         Priority => Gtk.Style_Provider.Priority_Application);
+
+      Unref (Provider);
+      Css_Date_Loaded := True;
+   end Load_Date_CSS;
+
+   -------------------------------------------
    --  BUILD                                --
    -------------------------------------------
    procedure Build (Object : not null access Glib.Object.GObject_Record'Class;
@@ -388,12 +410,16 @@ package body Ada_Widgets.Date_Picker.Implem is
       Day_Entry    : Gtk_Entry;
       The_Button   : Gtk_Button;
       Child        : Gtk_Widget;
+      Now          : Ada.Calendar.Time;
    begin
       Ada_Log ("ada_widgets.date_picker.implem.build: "
                & "object=" & Type_Name (Get_Type (Object))
                & " (" & To_Hex (Glib.Object.Get_Object (Object)'Image) & ")");
 
-      --  1. Convert the Fake object to a Gtk Frame
+      -- 0. Get current date/time
+      Now := Ada.Calendar.Clock;
+
+      --  1. Cast the object to a Gtk Frame
       Widget := Gtk_Frame (Object);
 
       --  2. Initialize the widget Gtk_Frame
@@ -429,8 +455,8 @@ package body Ada_Widgets.Date_Picker.Implem is
       --  6. Create and configure year entry
       Gtk.GEntry.Gtk_New (Year_Entry);
       Year_Entry.Set_Name ("Date_Picker_Year_Entry");
-      Year_Entry.Set_Placeholder_Text ("YYYY");
-      Year_Entry.Set_Width_Chars (5);
+      Year_Entry.Set_Placeholder_Text (Image (Now, "%Y"));
+      Year_Entry.Set_Width_Chars (4);
       Year_Entry.Set_Max_Length (4);
       Year_Entry.Set_Alignment (0.5);
       Year_Entry.Set_Overwrite_Mode (True);
@@ -442,8 +468,8 @@ package body Ada_Widgets.Date_Picker.Implem is
       --  7. Create and configure month entry
       Gtk.GEntry.Gtk_New (Month_Entry);
       Month_Entry.Set_Name ("Date_Picker_Month_Entry");
-      Month_Entry.Set_Placeholder_Text ("MM");
-      Month_Entry.Set_Width_Chars (4);
+      Month_Entry.Set_Placeholder_Text (Image (Now, "%m"));
+      Month_Entry.Set_Width_Chars (2);
       Month_Entry.Set_Max_Length (2);
       Month_Entry.Set_Alignment (0.5);
       Month_Entry.Set_Overwrite_Mode (True);
@@ -455,8 +481,8 @@ package body Ada_Widgets.Date_Picker.Implem is
       --  8. Create and configure day entry
       Gtk.GEntry.Gtk_New (Day_Entry);
       Day_Entry.Set_Name ("Date_Picker_Day_Entry");
-      Day_Entry.Set_Placeholder_Text ("DD");
-      Day_Entry.Set_Width_Chars (4);
+      Day_Entry.Set_Placeholder_Text (Image (Now, "%d"));
+      Day_Entry.Set_Width_Chars (2);
       Day_Entry.Set_Max_Length (2);
       Day_Entry.Set_Alignment (0.5);
       Day_Entry.Set_Overwrite_Mode (True);

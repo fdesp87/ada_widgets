@@ -606,7 +606,7 @@ package body Gtk_Ada_Time_Picker is
       --  6. Create and pack the hour entry and its button
       Gtk.GEntry.Gtk_New (Widget.Hour_Entry);
       Widget.Hour_Entry.Set_Name ("Time_Picker_Hour_Entry");
-      Widget.Hour_Entry.Set_Width_Chars (4);
+      Widget.Hour_Entry.Set_Width_Chars (2);
       Widget.Hour_Entry.Set_Max_Length (2);
       Widget.Hour_Entry.Set_Alignment (0.5);
       Widget.Hour_Entry.Set_Overwrite_Mode (True);
@@ -627,7 +627,7 @@ package body Gtk_Ada_Time_Picker is
       --  7. Create and pack the minute entry and its button
       Gtk.GEntry.Gtk_New (Widget.Min_Entry);
       Widget.Min_Entry.Set_Name ("Time_Picker_Min_Entry");
-      Widget.Min_Entry.Set_Width_Chars (4);
+      Widget.Min_Entry.Set_Width_Chars (2);
       Widget.Min_Entry.Set_Max_Length (2);
       Widget.Min_Entry.Set_Alignment (0.5);
       Widget.Min_Entry.Set_Overwrite_Mode (True);
@@ -648,7 +648,7 @@ package body Gtk_Ada_Time_Picker is
       --  8. Create and pack the second entry and its button
       Gtk.GEntry.Gtk_New (Widget.Sec_Entry);
       Widget.Sec_Entry.Set_Name ("Time_Picker_Sec_Entry");
-      Widget.Sec_Entry.Set_Width_Chars (4);
+      Widget.Sec_Entry.Set_Width_Chars (2);
       Widget.Sec_Entry.Set_Max_Length (2);
       Widget.Sec_Entry.Set_Alignment (0.5);
       Widget.Sec_Entry.Set_Overwrite_Mode (True);

@@ -20,6 +20,7 @@ with Interfaces.C.Extensions;
 with Glade_Binding.Editor_Property; use Glade_Binding.Editor_Property;
 
 package Ada_Widgets.Date_Picker.Validation is
+
    package ICE renames Interfaces.C.Extensions;
 
    function Is_Valid_Format (Date_Str : String) return Boolean;

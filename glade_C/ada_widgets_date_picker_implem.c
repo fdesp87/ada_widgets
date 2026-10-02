@@ -16,7 +16,9 @@
 --  LICENSE.GLP and LICENSE.LGPL. If not, see <http:--www.gnu.org-licenses-> --
 -----------------------------------------------------------------------------*/
 #include "ada_widgets_date_picker_implem.h"
-
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 /*----------------------------------------------------------------------------*/
 static void
@@ -93,15 +95,41 @@ Load_Date_CSS (void)
 }
 
 /*----------------------------------------------------------------------------*/
+/* gEt CURENT DATE                                                            */
+/*----------------------------------------------------------------------------*/
+void getCurrentDate(char **year, char **month, char **day) {
+    time_t rawtime = time(NULL);
+    struct tm *timeinfo = localtime(&rawtime);
+
+    *year = (char *)malloc(5 * sizeof(char));
+    *month = (char *)malloc(3 * sizeof(char));
+    *day = (char *)malloc(3 * sizeof(char));
+
+    if (*year == NULL || *month == NULL || *day == NULL) {
+        return;
+    }
+
+    strftime(*year, 5, "%Y", timeinfo);
+    strftime(*month, 3, "%m", timeinfo);
+    strftime(*day, 3, "%d", timeinfo);
+}
+
+/*----------------------------------------------------------------------------*/
 /* BUILD                                                                      */
 /*----------------------------------------------------------------------------*/
 void
 ada_widgets_date_picker_implem_build (GObject *object,
                                       gboolean show)
 {
+  char *year = NULL;
+  char *month = NULL;
+  char *day = NULL;
+
   Ada_Log ("ada_widgets_date_picker_implem.build: "
            "object=%s (%p)",
            G_OBJECT_TYPE_NAME (object), (void *)object);
+
+  getCurrentDate(&year, &month, &day);
 
   GtkFrame *frame = GTK_FRAME (object);
   gtk_frame_set_shadow_type (frame, GTK_SHADOW_NONE);
@@ -132,17 +160,31 @@ ada_widgets_date_picker_implem_build (GObject *object,
     {
       GtkWidget *entry_yyyy = gtk_entry_new ();
       gtk_widget_set_name (entry_yyyy, "Date_Picker_Year_Entry");
-      gtk_entry_set_placeholder_text (GTK_ENTRY (entry_yyyy), "YYYY");
-      gtk_entry_set_width_chars (GTK_ENTRY (entry_yyyy), 5);
+      if (year != NULL)
+        {
+          gtk_entry_set_placeholder_text (GTK_ENTRY (entry_yyyy), year);
+        }
+      else
+        {
+          gtk_entry_set_placeholder_text (GTK_ENTRY (entry_yyyy), "YYYY");
+        }
+      gtk_entry_set_width_chars (GTK_ENTRY (entry_yyyy), 4);
       gtk_entry_set_max_length (GTK_ENTRY (entry_yyyy), 4);
       gtk_entry_set_alignment (GTK_ENTRY (entry_yyyy), 0.5);
       gtk_entry_set_overwrite_mode (GTK_ENTRY (entry_yyyy), TRUE);
-      gtk_box_pack_start (GTK_BOX (hbox), entry_yyyy, TRUE, TRUE, 0);
+      gtk_box_pack_start (GTK_BOX (hbox), entry_yyyy, FALSE, FALSE, 0);
 
       GtkWidget *entry_mm = gtk_entry_new ();
       gtk_widget_set_name (entry_mm, "Date_Picker_Month_Entry");
-      gtk_entry_set_placeholder_text (GTK_ENTRY (entry_mm), "MM");
-      gtk_entry_set_width_chars (GTK_ENTRY (entry_mm), 4);
+      if (month != NULL)
+        {
+          gtk_entry_set_placeholder_text (GTK_ENTRY (entry_mm), month);
+        }
+      else
+        {
+          gtk_entry_set_placeholder_text (GTK_ENTRY (entry_mm), "MM");
+        }
+      gtk_entry_set_width_chars (GTK_ENTRY (entry_mm), 2);
       gtk_entry_set_max_length (GTK_ENTRY (entry_mm), 2);
       gtk_entry_set_alignment (GTK_ENTRY (entry_mm), 0.5);
       gtk_entry_set_overwrite_mode (GTK_ENTRY (entry_mm), TRUE);
@@ -150,8 +192,15 @@ ada_widgets_date_picker_implem_build (GObject *object,
 
       GtkWidget *entry_dd = gtk_entry_new ();
       gtk_widget_set_name (entry_dd, "Date_Picker_Day_Entry");
-      gtk_entry_set_placeholder_text (GTK_ENTRY (entry_dd), "DD");
-      gtk_entry_set_width_chars (GTK_ENTRY (entry_dd), 4);
+      if (day != NULL)
+        {
+          gtk_entry_set_placeholder_text (GTK_ENTRY (entry_dd), day);
+        }
+      else
+        {
+          gtk_entry_set_placeholder_text (GTK_ENTRY (entry_dd), "DD");
+        }
+      gtk_entry_set_width_chars (GTK_ENTRY (entry_dd), 2);
       gtk_entry_set_max_length (GTK_ENTRY (entry_dd), 2);
       gtk_entry_set_alignment (GTK_ENTRY (entry_dd), 0.5);
       gtk_entry_set_overwrite_mode (GTK_ENTRY (entry_dd), TRUE);
@@ -181,6 +230,10 @@ ada_widgets_date_picker_implem_build (GObject *object,
   if (show) {
       gtk_widget_show_all (GTK_WIDGET (object));
     }
+
+  free (year);
+  free (month);
+  free (day);
 }
 
 /*----------------------------------------------------------------------------*/

@@ -18,6 +18,8 @@
 with System;
 with Interfaces.C;
 with Interfaces.C.Strings;
+with Ada.Calendar;
+with GNAT.Calendar.Time_IO;      use GNAT.Calendar.Time_IO;
 
 with Gtk.Enums;
 with Gtk.Image;
@@ -30,12 +32,17 @@ with Gtk.Css_Provider;           use Gtk.Css_Provider;
 with Gtk.Style_Provider;         use Gtk.Style_Provider;
 with Gtk.Style_Context;
 with Gdk.Screen;
-with Glib.Error;
 with Gdk.Pixbuf;                 use Gdk.Pixbuf;
+with Gtk.Container.Additions;    use Gtk.Container.Additions;
 with Gtkada.Types;
+
+with Glib.Values;
+with Glib.Additions;             use Glib.Additions;
+with Glib.Properties;
+with Glib.Properties.Creation;   use Glib.Properties.Creation;
 with Glib.Generic_Properties;    use Glib.Generic_Properties;
+with Glib.Error;
 with Glib.Type_Conversion_Hooks;
-with Gtk.Container.Additions;              use Gtk.Container.Additions;
 
 package body Ada_Widgets.Time_Picker.Implem is
 
@@ -63,7 +70,10 @@ package body Ada_Widgets.Time_Picker.Implem is
    -------------------------------------------
    --  SET PROPERTY                         --
    -------------------------------------------
-
+   procedure Set_Property (Object        : GObject_Ptr;
+                           Prop_Id       : Property_Id;
+                           Value         : Glib.Values.GValue;
+                           Property_Spec : Param_Spec);
    procedure Set_Property (Object        : GObject_Ptr;
                            Prop_Id       : Property_Id;
                            Value         : Glib.Values.GValue;
@@ -97,6 +107,10 @@ package body Ada_Widgets.Time_Picker.Implem is
    -------------------------------------------
    --  GET PROPERTY                         --
    -------------------------------------------
+   procedure Get_Property (Object        : GObject_Ptr;
+                           Prop_Id       : Property_Id;
+                           Value         : out Glib.Values.GValue;
+                           Property_Spec : Param_Spec);
    procedure Get_Property (Object        : GObject_Ptr;
                            Prop_Id       : Property_Id;
                            Value         : out Glib.Values.GValue;
@@ -204,7 +218,7 @@ package body Ada_Widgets.Time_Picker.Implem is
     end Class_Init;
 
    -------------------------------------------
-   --  TIME PICKER INIT                     --
+   --  INSTANCE INIT                        --
    -------------------------------------------
    procedure Instance_Init (Object : GObject_Ptr;
                             GClass : GObject_Class);
@@ -386,13 +400,17 @@ package body Ada_Widgets.Time_Picker.Implem is
       Min_Button  : Gtk_Button;
       Sec_Button  : Gtk_Button;
       Child       : Gtk_Widget;
+      Now         : Ada.Calendar.Time;
    begin
 
       Ada_Log ("ada_widgets.time_picker.implem.build: "
                & "object=" & Type_Name (Get_Type (Object))
                & " (" & To_Hex (Glib.Object.Get_Object (Object)'Image) & ")");
 
-      --  1. Convert the Fake object to a Gtk Frame
+      -- 0. Get current date/time
+      Now := Ada.Calendar.Clock;
+
+      --  1. Cast the object to a Gtk Frame
       Widget := Gtk_Frame (Object);
 
       --  2. Initialize the widget Gtk_Frame
@@ -428,10 +446,10 @@ package body Ada_Widgets.Time_Picker.Implem is
       --  6. Create and pack the hour entry and its button
       Gtk.GEntry.Gtk_New (Hour_Entry);
       Hour_Entry.Set_Name ("Time_Picker_Hour_Entry");
-      Hour_Entry.Set_Width_Chars (4);
+      Hour_Entry.Set_Width_Chars (2);
       Hour_Entry.Set_Max_Length (2);
       Hour_Entry.Set_Alignment (0.5);
-      Hour_Entry.Set_Placeholder_Text ("HH");
+      Hour_Entry.Set_Placeholder_Text (Image (Now, "%H"));
       Hour_Entry.Set_Overwrite_Mode (True);
       HBox.Pack_Start (Hour_Entry,
                        Expand  => False,
@@ -450,10 +468,10 @@ package body Ada_Widgets.Time_Picker.Implem is
       --  7. Create and pack the minute entry and its button
       Gtk.GEntry.Gtk_New (Min_Entry);
       Min_Entry.Set_Name ("Time_Picker_Min_Entry");
-      Min_Entry.Set_Width_Chars (4);
+      Min_Entry.Set_Width_Chars (2);
       Min_Entry.Set_Max_Length (2);
       Min_Entry.Set_Alignment (0.5);
-      Min_Entry.Set_Placeholder_Text ("mm");
+      Min_Entry.Set_Placeholder_Text (Image (Now, "%M"));
       Min_Entry.Set_Overwrite_Mode (True);
       HBox.Pack_Start (Min_Entry,
                        Expand  => False,
@@ -472,10 +490,10 @@ package body Ada_Widgets.Time_Picker.Implem is
       --  8. Create and pack the second entry and its button
       Gtk.GEntry.Gtk_New (Sec_Entry);
       Sec_Entry.Set_Name ("Time_Picker_Sec_Entry");
-      Sec_Entry.Set_Width_Chars (4);
+      Sec_Entry.Set_Width_Chars (2);
       Sec_Entry.Set_Max_Length (2);
       Sec_Entry.Set_Alignment (0.5);
-      Sec_Entry.Set_Placeholder_Text ("ss");
+      Sec_Entry.Set_Placeholder_Text (Image (Now, "%S"));
       Sec_Entry.Set_Overwrite_Mode (True);
       HBox.Pack_Start (Sec_Entry,
                        Expand  => False,

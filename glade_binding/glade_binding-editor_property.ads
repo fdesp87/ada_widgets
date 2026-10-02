@@ -47,12 +47,11 @@ package Glade_Binding.Editor_Property is
    pragma Convention (C, Editor_Prop);
    pragma No_Strict_Aliasing (Editor_Prop);
 
-   function New_Eprop
-     (Typ         : Glib.GType;
-      Prop_Name1  : Chars_Ptr;
-      Prop_Value1 : System.Address;
-      Prop_Name2  : Chars_Ptr;
-      Prop_Value2 : ICE.bool) return Editor_Prop;
+   function New_Eprop (Typ         : Glib.GType;
+                       Prop_Name1  : Chars_Ptr;
+                       Prop_Value1 : System.Address;
+                       Prop_Name2  : Chars_Ptr;
+                       Prop_Value2 : ICE.bool) return Editor_Prop;
 
    ------------------------------------------------------------------
    --  Generic instantiations
@@ -71,12 +70,11 @@ package Glade_Binding.Editor_Property is
       type Extra_Eprop is access all Extra_Prop_Record;
       pragma Convention (C, Extra_Eprop);
 
-      function New_Extra_Eprop
-        (Typ         : Glib.GType;
-         Prop_Name1  : Chars_Ptr;
-         Prop_Value1 : System.Address;
-         Prop_Name2  : Chars_Ptr;
-         Prop_Value2 : ICE.bool) return Extra_Eprop;
+      function New_Extra_Eprop (Typ         : Glib.GType;
+                                Prop_Name1  : Chars_Ptr;
+                                Prop_Value1 : System.Address;
+                                Prop_Name2  : Chars_Ptr;
+                                Prop_Value2 : ICE.bool) return Extra_Eprop;
 
       function "+" is new Ada.Unchecked_Conversion
         (Source => Editor_Prop,

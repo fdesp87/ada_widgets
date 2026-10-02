@@ -17,23 +17,8 @@
 -------------------------------------------------------------------------------
 with Glib;                     use Glib;
 with Glib.Object;              use Glib.Object;
-with Glib.Values;
-with Glib.Properties;
-with Glib.Properties.Creation; use Glib.Properties.Creation;
-with Glib.Additions;           use Glib.Additions;
 
 with Gtk.Frame;         use Gtk.Frame;
-
---  Hierarchy:
---    Frame
---      Hbox (or container inside frame)
---        Hour Entry
---        Hour Button
---        Minute Entry
---        Minute Button
---        Second Entry
---        Second Button
---        Day Entry
 
 package Ada_Widgets.Time_Picker.Implem is
 
@@ -44,40 +29,13 @@ package Ada_Widgets.Time_Picker.Implem is
    --  GET TYPE                             --
    -------------------------------------------
    function Get_Type return Glib.GType; --  of Ada_Time_Picker
-   pragma Export (C, Get_Type, "ada_time_picker_get_type");
+   pragma Convention (C, Get_Type);
    --  Note: It is mandatory to keep the exported symbol as it is
-
-   -------------------------------------------
-   --  TIME ZONE GET TYPE                   --
-   -------------------------------------------
-   --  function Time_Zone_Get_Type return Glib.GType;
-   --  pragma Export (C, Time_Zone_Get_Type, "ada_time_zone_get_type");
-   --  This function is not called as this enumerated type is created
-   --  automatically by the Ada package
-   --           package Time_Zone_Properties is new
-   --              Glib.Generic_Properties.Generic_Enumeration_Property
-   --               ("AdaTimeZone", Time_Zone);
 
    -------------------------------------------
    --  BUILD                                --
    -------------------------------------------
    procedure Build (Object : not null access Glib.Object.GObject_Record'Class;
                     Show   : Boolean);
-
-   -------------------------------------------
-   --  SET PROPERTY                         --
-   -------------------------------------------
-   procedure Set_Property (Object        : GObject_Ptr;
-                           Prop_Id       : Property_Id;
-                           Value         : Glib.Values.GValue;
-                           Property_Spec : Param_Spec);
-
-   -------------------------------------------
-   --  GET PROPERTY                         --
-   -------------------------------------------
-   procedure Get_Property (Object        : GObject_Ptr;
-                           Prop_Id       : Property_Id;
-                           Value         : out Glib.Values.GValue;
-                           Property_Spec : Param_Spec);
 
 end Ada_Widgets.Time_Picker.Implem;

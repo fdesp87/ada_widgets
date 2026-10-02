@@ -43,35 +43,27 @@ package body Ada_Widgets.Date_Picker.Editor is
 
    package GBP renames Glade_Binding.Properties;
 
-   -----------------------------------------------------------------------------
-   --  Klass and Parent Klass
-   -----------------------------------------------------------------------------
-   --  Klass : aliased Glib.Object.Ada_GObject_Class := Glib.Object.Uninitialized_Class;
+   -----------------------------------
+   --  Klass and Parent Klass       --
+   -----------------------------------
    Klass        : Glib.GType := Glib.GType_None;
    Parent_Klass : Editor_Property_Class := null;
 
-   ------------------------------------------------------------------
-   --  The Date Editor Property
-   ------------------------------------------------------------------
+   -----------------------------------
+   --  The Date Editor Property     --
+   -----------------------------------
    package Date_Editor_Property is new Editor_Property_Extension
      (Extra_Data => Gtk_Entry);
 
-   ------------------------------------------------------------------
-   --  Forward declarations
-   ------------------------------------------------------------------
-   function Glade_Eprop_Datepicker_Get_Type return Glib.GType;
-   pragma Convention (C, Glade_Eprop_Datepicker_Get_Type);
+   -----------------------------------
+   --  User Data from Glib.Object   --
+   -----------------------------------
+   package Eprop_User_Data is new Glib.Object.User_Data
+     (Data_Type => Editor_Prop);
 
-   procedure Eprop_Load (Eprop : Editor_Prop;
-                         Prop  : Glade_Binding.Properties.Property);
-   pragma Convention (C, Eprop_Load);
-
-   function Create_Input_Impl (Eprop : Editor_Prop) return Glade_Widget;
-   pragma Convention (C, Create_Input_Impl);
-
-   ------------------------------------------------------------------
-   --  commit_datepicker
-   ------------------------------------------------------------------
+   -----------------------------------
+   --  commit_datepicker            --
+   -----------------------------------
    procedure Commit_Datepicker (Date_Entry : Gtk_Entry;
                                 Eprop      : Editor_Prop);
    procedure Commit_Datepicker (Date_Entry : Gtk_Entry;
@@ -132,15 +124,9 @@ package body Ada_Widgets.Date_Picker.Editor is
       end if;
    end Commit_Datepicker;
 
-   ------------------------------------------------------------------
-   --  User Data from Glib.Object
-   ------------------------------------------------------------------
-   package Eprop_User_Data is new Glib.Object.User_Data
-     (Data_Type => Editor_Prop);
-
-   ------------------------------------------------------------------
-   --  Signal handlers
-   ------------------------------------------------------------------
+   -----------------------------------
+   --  Signal handlers              --
+   -----------------------------------
    package Void_Handlers is new Gtk.Handlers.Callback
      (Widget_Type => Gtk_Entry_Record);
 
@@ -175,9 +161,13 @@ package body Ada_Widgets.Date_Picker.Editor is
       return False;
    end On_Focus_Out;
 
-   ------------------------------------------------------------------
-   --  Virtual: load
-   ------------------------------------------------------------------
+   -----------------------------------
+   --  Virtual: load                --
+   -----------------------------------
+   procedure Eprop_Load (Eprop : Editor_Prop;
+                         Prop  : Glade_Binding.Properties.Property);
+   pragma Convention (C, Eprop_Load);
+
    procedure Eprop_Load (Eprop : Editor_Prop;
                          Prop  : Glade_Binding.Properties.Property)
    is
@@ -258,12 +248,16 @@ package body Ada_Widgets.Date_Picker.Editor is
       Unset (Value);
    end Eprop_Load;
 
-   ------------------------------------------------------------------
-   --  Virtual: create_input
-   ------------------------------------------------------------------
+   -----------------------------------
+   --  Virtual: create_input        --
+   -----------------------------------
    --  The C implementation returns a GtkWidget *, but the Ada binding uses
    --  Glade_Widget as the raw C pointer type.  Do not replace this with the
    --  GtkAda Gtk_Widget type, which is an Ada wrapper containing the C pointer.
+
+   function Create_Input_Impl (Eprop : Editor_Prop) return Glade_Widget;
+   pragma Convention (C, Create_Input_Impl);
+
    function Create_Input_Impl (Eprop : Editor_Prop) return Glade_Widget
    is
       use Date_Editor_Property;
@@ -329,10 +323,9 @@ package body Ada_Widgets.Date_Picker.Editor is
       return To_Glade_Widget (Get_Object (Date_Entry));
    end Create_Input_Impl;
 
-   ------------------------------------------------------------------
-   --  GType registration
-   ------------------------------------------------------------------
-
+   -------------------------------
+   --  INSTANCE_INIT            --
+   -------------------------------
    procedure Instance_Init (Object  : GObject_Ptr;
                             G_Class : GObject_Class);
    pragma Convention (C, Instance_Init);
@@ -346,7 +339,9 @@ package body Ada_Widgets.Date_Picker.Editor is
       --  Date_Entry is already null when the type is created
    end Instance_Init;
 
-   -----------------------------------------------------------------------------
+   -------------------------------
+   --  CLASS_INIT               --
+   -------------------------------
    procedure Class_Init (Self : GObject_Class);
    pragma Convention (C, Class_Init);
 
@@ -373,6 +368,12 @@ package body Ada_Widgets.Date_Picker.Editor is
                  else To_Hex (Parent_Klass.Load'Address'Image)));
    end Class_Init;
 
+   function Glade_Eprop_Datepicker_Get_Type return Glib.GType;
+   pragma Convention (C, Glade_Eprop_Datepicker_Get_Type);
+
+   -------------------------------
+   --  GET TYPE                 --
+   -------------------------------
    function Glade_Eprop_Datepicker_Get_Type return Glib.GType is
       use type Glib.GType;
 
@@ -419,7 +420,6 @@ package body Ada_Widgets.Date_Picker.Editor is
 
       return Klass;
    end Glade_Eprop_Datepicker_Get_Type;
-
 
    ------------------------------------------------------------------
    --  Catalog entry point
@@ -486,7 +486,6 @@ package body Ada_Widgets.Date_Picker.Editor is
                         & (if Prop = null then "null"
                           else To_Hex (Prop'Address'Image)));
             end;
-
 
             return Eprop;
          end;

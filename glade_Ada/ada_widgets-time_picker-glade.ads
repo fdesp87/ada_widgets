@@ -16,7 +16,6 @@
 --  LICENSE.GLP and LICENSE.LGPL. If not, see <http:--www.gnu.org-licenses-> --                              --
 -------------------------------------------------------------------------------
 with Glib;                         use Glib;
---  with Glib.Values;                  use Glib.Values;
 with Glib.Additions;               use Glib.Additions;
 
 
@@ -24,25 +23,13 @@ with Glade_Binding;                use Glade_Binding;
 with Glade_Binding.Widget_Adaptor; use Glade_Binding.Widget_Adaptor;
 
 package Ada_Widgets.Time_Picker.Glade is
-   pragma Warnings (Off, "involves a tagged type which does not correspond to any C type");
 
    -------------------------------------------
-   --  SET_PROPERTY                         --
+   --  GET TYPE                             --
    -------------------------------------------
-   --  procedure Set_Property (Adtor        : Adaptor;
-   --                          Object       : GObject_Ptr;
-   --                          Id           : chars_ptr;
-   --                          Value_Access : access GValue);
-   --  pragma Export (C, Set_Property, "ada_widgets_time_picker_glade_set_property");
-
-   -------------------------------------------
-   --  GET_PROPERTY                         --
-   -------------------------------------------
-   --  procedure Get_Property (Adtor        : Adaptor;
-   --                          Object       : GObject_Ptr;
-   --                          Id           : chars_ptr;
-   --                          Value_Access : access GValue);
-   --  pragma Export (C, Get_Property, "ada_widgets_time_picker_glade_get_property");
+   function Get_Type return Glib.GType;
+   pragma Export (C, Get_Type, "ada_time_picker_get_type");
+   --  Note: It is mandatory to keep the exported symbol as it is
 
    -------------------------------------------
    --  POST CREATE                          --
@@ -52,5 +39,5 @@ package Ada_Widgets.Time_Picker.Glade is
                           Reason  : Glade_Create_Reason);
    pragma Export (C, Post_Create, "ada_widgets_time_picker_glade_post_create");
 
-   pragma Warnings (On, "involves a tagged type which does not correspond to any C type");
+
 end Ada_Widgets.Time_Picker.Glade;

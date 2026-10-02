@@ -17,23 +17,7 @@
 -------------------------------------------------------------------------------
 with Glib;              use Glib;
 with Glib.Object;       use Glib.Object;
-with Glib.Values;
-with Glib.Properties;
-with Glib.Additions;    use Glib.Additions;
-with Glib.Properties.Creation; use Glib.Properties.Creation;
-
 with Gtk.Frame;         use Gtk.Frame;
-
---  Hierarchy:
---    Frame
---      Hbox (or container inside frame)
---        Year Entry
---        Month Entry
---        Day Entry
---        Button
---          Image
---    Popover (Floating container attached to the Button)
---      Calendar
 
 package Ada_Widgets.Date_Picker.Implem is
 
@@ -46,7 +30,7 @@ package Ada_Widgets.Date_Picker.Implem is
    -------------------------------------------
    --  GET TYPE                             --
    -------------------------------------------
-   function Get_Type return Glib.GType;
+   function Get_Type return Glib.GType; --  of Ada Date Picker
    pragma Convention (C, Get_Type);
 
    -------------------------------------------
@@ -54,21 +38,5 @@ package Ada_Widgets.Date_Picker.Implem is
    -------------------------------------------
    procedure Build (Object : not null access Glib.Object.GObject_Record'Class;
                     Show   : Boolean);
-
-   -------------------------------------------
-   --  SET PROPERTY                         --
-   -------------------------------------------
-   procedure Set_Property (Object        : GObject_Ptr;
-                           Prop_Id       : Property_Id;
-                           Value         : Glib.Values.GValue;
-                           Property_Spec : Param_Spec);
-
-   -------------------------------------------
-   --  GET PROPERTY                         --
-   -------------------------------------------
-   procedure Get_Property (Object        : GObject_Ptr;
-                           Prop_Id       : Property_Id;
-                           Value         : out Glib.Values.GValue;
-                           Property_Spec : Param_Spec);
 
 end Ada_Widgets.Date_Picker.Implem;

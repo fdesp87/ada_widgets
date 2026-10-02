@@ -300,7 +300,7 @@ package body Ada_Widgets.Date_Picker.Validation is
    end Validate_Date_Value;
 
    ------------------------------------------------------------------
-   --  Entry point used by the editor
+   --  Entry point used by the eprop editor
    ------------------------------------------------------------------
    function Ada_Date_Picker_Validate_Dates (Eprop : Editor_Prop;
                                             Value : access GValue)

@@ -29,23 +29,6 @@ ada_widgets_date_picker_glade_get_type (void)
 // Note: It is mandatory to keep the exported symbol as it is written
 
 /*----------------------------------------------------------------------------*/
-/* SET PROPERTY                                                               */
-/*----------------------------------------------------------------------------*/
-// G_MODULE_EXPORT void
-// ada_widgets_date_picker_glade_set_property (GladeWidgetAdaptor *adaptor,
-//                                             GObject *object, const gchar *id,
-//                                             const GValue *value);
-
-/*----------------------------------------------------------------------------*/
-/* GET PROPERTY                                                               */
-/*----------------------------------------------------------------------------*/
-// G_MODULE_EXPORT void
-// ada_widgets_date_picker_glade_get_property (GladeWidgetAdaptor *adaptor,
-//                                             GObject *object,
-//                                             const gchar *id,
-//                                             GValue *value);
-
-/*----------------------------------------------------------------------------*/
 /* POST CREATE                                                                */
 /*----------------------------------------------------------------------------*/
 G_MODULE_EXPORT void

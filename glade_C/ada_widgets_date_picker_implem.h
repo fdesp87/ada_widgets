@@ -47,22 +47,4 @@ ada_widgets_date_picker_implem_get_type (void);
 /*----------------------------------------------------------------------------*/
 void ada_widgets_date_picker_implem_build (GObject *object, gboolean show);
 
-/*----------------------------------------------------------------------------*/
-/* SET PROPERTY                                                               */
-/*----------------------------------------------------------------------------*/
-static void
-ada_widgets_date_picker_implem_set_property (GObject *object,
-                                             guint prop_id,
-                                             const GValue *value,
-                                             GParamSpec *pspec);
-
-/*----------------------------------------------------------------------------*/
-/* GET PROPERTY                                                               */
-/*----------------------------------------------------------------------------*/
-static void
-ada_widgets_date_picker_implem_get_property (GObject *object,
-                                             guint prop_id,
-                                             GValue *value,
-                                             GParamSpec *pspec);
-
 #endif /* ADA_WIDGETS_DATE_PICKER_IMPLEM_H */

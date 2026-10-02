@@ -638,7 +638,7 @@ package body Gtk_Ada_Date_Picker is
 
       --  7. Create and configure month entry
       Gtk.GEntry.Gtk_New (Widget.Month_Entry);
-      Widget.Month_Entry.Set_Width_Chars (4);
+      Widget.Month_Entry.Set_Width_Chars (2);
       Widget.Month_Entry.Set_Max_Width_Chars (2);
       Widget.Month_Entry.Set_Max_Length (2);
       Widget.Month_Entry.Set_Alignment (0.5);
@@ -652,7 +652,7 @@ package body Gtk_Ada_Date_Picker is
 
       --  8. Create and configure day entry
       Gtk.GEntry.Gtk_New (Widget.Day_Entry);
-      Widget.Day_Entry.Set_Width_Chars (4);
+      Widget.Day_Entry.Set_Width_Chars (2);
       Widget.Day_Entry.Set_Max_Width_Chars (2);
       Widget.Day_Entry.Set_Max_Length (2);
       Widget.Day_Entry.Set_Alignment (0.5);

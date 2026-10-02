@@ -36,22 +36,4 @@ ada_widgets_time_picker_glade_post_create (GladeWidgetAdaptor *adaptor,
                                            GObject            *object,
                                            GladeCreateReason   reason);
 
-/*----------------------------------------------------------------------------*/
-/* SET PROPERTY                                                               */
-/*----------------------------------------------------------------------------*/
-// G_MODULE_EXPORT void
-// ada_widgets_time_picker_glade_set_property (GladeWidgetAdaptor *adaptor,
-//                                             GObject            *object,
-//                                             const gchar        *id,
-//                                             const GValue       *value);
-
-/*----------------------------------------------------------------------------*/
-/* GET PROPERTY                                                               */
-/*----------------------------------------------------------------------------*/
-// G_MODULE_EXPORT void
-// ada_widgets_time_picker_glade_get_property (GladeWidgetAdaptor *adaptor,
-//                                             GObject *object,
-//                                             const gchar *id,
-//                                             GValue *value);
-
 #endif /* ADA_TIME_PICKER_GLADE_H */

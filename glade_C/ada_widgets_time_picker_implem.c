@@ -16,6 +16,9 @@
 --  LICENSE.GLP and LICENSE.LGPL. If not, see <http:--www.gnu.org-licenses-> --
 -----------------------------------------------------------------------------*/
 #include "ada_widgets_time_picker_implem.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 static GtkWidget *
 create_embedded_image (void)
@@ -104,12 +107,36 @@ Load_Time_CSS (void)
 }
 
 /*----------------------------------------------------------------------------*/
+void getCurrentTime(char **hour, char **minute, char **second) {
+    time_t rawtime = time(NULL);
+    struct tm *timeinfo = localtime(&rawtime);
+
+    *hour = (char *)malloc(3 * sizeof(char));
+    *minute = (char *)malloc(3 * sizeof(char));
+    *second = (char *)malloc(3 * sizeof(char));
+
+    if (*hour == NULL || *minute == NULL || *second == NULL) {
+        return;
+    }
+
+    strftime(*hour, 3, "%H", timeinfo);
+    strftime(*minute, 3, "%M", timeinfo);
+    strftime(*second, 3, "%S", timeinfo);
+}
+
+/*----------------------------------------------------------------------------*/
 void
 ada_widgets_time_picker_implem_build (GObject *object, gboolean show)
 {
-   Ada_Log ("ada_widgets_time_picker_implem.build: "
+  char *hour = NULL;
+  char *minute = NULL;
+  char *second = NULL;
+
+  Ada_Log ("ada_widgets_time_picker_implem.build: "
            "object=%s (%p)",
            G_OBJECT_TYPE_NAME (object), (void *)object);
+
+  getCurrentTime (&hour, &minute, &second);
 
   GtkFrame *frame = GTK_FRAME (object);
   gtk_frame_set_shadow_type (frame, GTK_SHADOW_NONE);
@@ -140,10 +167,17 @@ ada_widgets_time_picker_implem_build (GObject *object, gboolean show)
     {
       GtkWidget *entry_hour = gtk_entry_new ();
       gtk_widget_set_name (entry_hour, "Time_Picker_Hour_Entry");
-      gtk_entry_set_width_chars (GTK_ENTRY (entry_hour), 3);
+      gtk_entry_set_width_chars (GTK_ENTRY (entry_hour), 2);
       gtk_entry_set_max_length (GTK_ENTRY (entry_hour), 2);
       gtk_entry_set_alignment (GTK_ENTRY (entry_hour), 0.5);
-      gtk_entry_set_placeholder_text (GTK_ENTRY (entry_hour), "HH");
+      if (hour != NULL)
+        {
+          gtk_entry_set_placeholder_text (GTK_ENTRY (entry_hour), hour);
+        }
+      else
+        {
+          gtk_entry_set_placeholder_text (GTK_ENTRY (entry_hour), "HH");
+        }
       gtk_box_pack_start (hbox, entry_hour, FALSE, FALSE, 0);
 
       GtkWidget *hour_button = gtk_button_new ();
@@ -153,10 +187,17 @@ ada_widgets_time_picker_implem_build (GObject *object, gboolean show)
 
       GtkWidget *entry_min = gtk_entry_new ();
       gtk_widget_set_name (entry_min, "Time_Picker_Min_Entry");
-      gtk_entry_set_width_chars (GTK_ENTRY (entry_min), 4);
+      gtk_entry_set_width_chars (GTK_ENTRY (entry_min), 2);
       gtk_entry_set_max_length (GTK_ENTRY (entry_min), 2);
       gtk_entry_set_alignment (GTK_ENTRY (entry_min), 0.5);
-      gtk_entry_set_placeholder_text (GTK_ENTRY (entry_min), "mm");
+      if (minute != NULL)
+        {
+          gtk_entry_set_placeholder_text (GTK_ENTRY (entry_min), minute);
+        }
+      else
+        {
+          gtk_entry_set_placeholder_text (GTK_ENTRY (entry_min), "MM");
+        }
       gtk_box_pack_start (hbox, entry_min, FALSE, FALSE, 0);
 
       GtkWidget *min_button = gtk_button_new ();
@@ -169,7 +210,14 @@ ada_widgets_time_picker_implem_build (GObject *object, gboolean show)
       gtk_entry_set_width_chars (GTK_ENTRY (entry_sec), 2);
       gtk_entry_set_max_length (GTK_ENTRY (entry_sec), 2);
       gtk_entry_set_alignment (GTK_ENTRY (entry_sec), 0.5);
-      gtk_entry_set_placeholder_text (GTK_ENTRY (entry_sec), "ss");
+      if (second != NULL)
+        {
+          gtk_entry_set_placeholder_text (GTK_ENTRY (entry_sec), second);
+        }
+      else
+        {
+          gtk_entry_set_placeholder_text (GTK_ENTRY (entry_sec), "SS");
+        }
       gtk_box_pack_start (hbox, entry_sec, FALSE, FALSE, 0);
 
       GtkWidget *sec_button = gtk_button_new ();
@@ -189,6 +237,10 @@ ada_widgets_time_picker_implem_build (GObject *object, gboolean show)
   if (show) {
       gtk_widget_show_all (GTK_WIDGET (object));
     }
+
+  free (hour);
+  free (minute);
+  free (second);
 }
 
 /*----------------------------------------------------------------------------*/
