@@ -20,7 +20,6 @@ with Glib.Messages; use Glib.Messages;
 with Gtk.Message_Dialog; use Gtk.Message_Dialog;
 with Gtk.Dialog;         use Gtk.Dialog;
 with Gtk.Enums;          use Gtk.Enums;
-with Glib;               use Glib;
 
 package body Ada_Widgets is
 

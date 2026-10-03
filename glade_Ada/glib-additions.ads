@@ -20,13 +20,12 @@ with Interfaces.C.Strings;
 with Ada.Unchecked_Conversion;
 with System.Address_To_Access_Conversions;
 
-with Glib.Object;              use Glib.Object;
-with Glib.Values;              use Glib.Values;
-with Glib.GSlist;              use Glib.GSlist;
-with Glib.Properties.Creation; use Glib.Properties.Creation;
+with Glib.Object;
+with Glib.Values;
+with Glib.GSlist;
+with Glib.Properties.Creation;
 
 package Glib.Additions is
-   pragma Elaborate_Body;
 
    -------------------------------------------
    --  FILLING OPAQUE RECORDS
@@ -108,7 +107,15 @@ package Glib.Additions is
               renames GObject_Conversions.To_Address;
 
    --  There is no direct conversion between GObject_Ptr and GObject_Record. Use
-   --  the routines that interface with C in glib.object.ads
+   --  the routines that interface with C in glib.object.ads in this way:
+   --    Object_0   : GObject_Ptr;
+   --    Stub       : Glib.Object.GObject_Record;
+   --    Ada_Object : constant Glib.Object.GObject :=
+   --                     Glib.Object.Get_User_Data (-Object_0, Stub);
+   --    Object_1   : constant GObject_Ptr := +Glib.Object.Get_Object (Ada_Object);
+
+   function Get_Type (Object : GObject_Ptr) return Glib.GType;
+   pragma Convention (C, Get_Type);
 
    -------------------------------------------------------
    --  PROPERTY LIST
@@ -124,7 +131,7 @@ package Glib.Additions is
    function "-" (Ptr : Property_Ptr) return System.Address
               renames Property_Conversions.To_Address;
 
-   package Property_SList is new Generic_SList (Property_Ptr, "-", "+");
+   package Property_SList is new Glib.GSlist.Generic_SList (Property_Ptr, "-", "+");
 
    -------------------------------------------------------
    --  G OBJECT CLASS BLOCK
@@ -133,13 +140,13 @@ package Glib.Additions is
    -------------------------------------------------------
    type Set_Property_Func is access procedure
      (Object        : GObject_Ptr;
-      Prop_Id       : Property_Id;
-      Value         : GValue;
+      Prop_Id       : Glib.Properties.Creation.Property_Id;
+      Value         : Glib.Values.GValue;
       Property_Spec : Param_Spec);
    type Get_Property_Func is access procedure
      (Object        : GObject_Ptr;
-      Prop_Id       : Property_Id;
-      Value         : out GValue;
+      Prop_Id       : Glib.Properties.Creation.Property_Id;
+      Value         : out Glib.Values.GValue;
       Property_Spec : Param_Spec);
 
    type GObject_Class_Block is record
@@ -201,20 +208,20 @@ package Glib.Additions is
    --  G TYPE INFO
    --  Corresponds to _GtyupeInfo in gtype.h line 1122
    -----------------------------------------------------
-   type GBase_Init_Func is access procedure (G_Class : GObject_Class);
+   type GBase_Init_Func is access procedure (G_Class : Glib.Object.GObject_Class);
    pragma Convention (C, GBase_Init_Func);
 
-   type GBase_Finalize_Func is access procedure (G_Class : GObject_Class);
+   type GBase_Finalize_Func is access procedure (G_Class : Glib.Object.GObject_Class);
    pragma Convention (C, GBase_Finalize_Func);
 
-   type GClass_Finalize_Func is access procedure (G_Class : GObject_Class);
+   type GClass_Finalize_Func is access procedure (G_Class : Glib.Object.GObject_Class);
    pragma Convention (C, GClass_Finalize_Func);
 
-   type GClass_Init_Func is access procedure (G_Class : GObject_Class);
+   type GClass_Init_Func is access procedure (G_Class : Glib.Object.GObject_Class);
    pragma Convention (C, GClass_Init_Func);
 
    type GInstanceInitFunc is access procedure (Object  : GObject_Ptr;
-                                               G_Class : GObject_Class);
+                                               G_Class : Glib.Object.GObject_Class);
    pragma Convention (C, GInstanceInitFunc);
 
    type GType_Info is record

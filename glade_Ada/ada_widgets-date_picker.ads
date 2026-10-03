@@ -15,13 +15,14 @@
 --  the GNU Lesser General Public License along with this program; see files --
 --  LICENSE.GLP and LICENSE.LGPL. If not, see <http:--www.gnu.org-licenses-> --                              --
 -------------------------------------------------------------------------------
-with Glib.Properties.Creation; use Glib.Properties.Creation;
+with Glib.Properties.Creation;
 
 package Ada_Widgets.Date_Picker is
 
    PROP_MIN_DATE  : constant := 1;
    PROP_MAX_DATE  : constant := 2;
 
-   function Prop_To_String (I : Property_Id) return String;
+   function Prop_To_String (I : Glib.Properties.Creation.Property_Id)
+                            return String;
 
 end Ada_Widgets.Date_Picker;

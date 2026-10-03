@@ -15,13 +15,14 @@
 --  the GNU Lesser General Public License along with this program; see files --
 --  LICENSE.GLP and LICENSE.LGPL. If not, see <http:--www.gnu.org-licenses-> --                              --
 -------------------------------------------------------------------------------
-with Glib.Properties.Creation; use Glib.Properties.Creation;
+with Glib.Properties.Creation;
 
 package Ada_Widgets.Time_Picker is
 
    PROP_TIME_ZONE : constant := 1;
 
-   function Prop_To_String (I : Property_Id) return String;
+   function Prop_To_String (I : Glib.Properties.Creation.Property_Id)
+                            return String;
 
    type Time_Zone is
      (--  Universal

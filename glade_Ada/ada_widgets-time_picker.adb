@@ -17,7 +17,8 @@
 -------------------------------------------------------------------------------
 package body Ada_Widgets.Time_Picker is
 
-   function Prop_To_String (I : Property_Id) return String is
+   function Prop_To_String (I : Glib.Properties.Creation.Property_Id)
+                            return String is
    begin
       case I is
          when PROP_TIME_ZONE =>

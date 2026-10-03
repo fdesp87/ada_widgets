@@ -16,7 +16,7 @@
 --  LICENSE.GLP and LICENSE.LGPL. If not, see <http:--www.gnu.org-licenses-> --                              --
 -------------------------------------------------------------------------------
 with Glib;              use Glib;
-with Glib.Object;       use Glib.Object;
+with Glib.Additions;    use Glib.Additions;
 with Gtk.Frame;         use Gtk.Frame;
 
 package Ada_Widgets.Date_Picker.Implem is
@@ -36,7 +36,7 @@ package Ada_Widgets.Date_Picker.Implem is
    -------------------------------------------
    --  BUILD                                --
    -------------------------------------------
-   procedure Build (Object : not null access Glib.Object.GObject_Record'Class;
+   procedure Build (Object : not null GObject_Ptr;
                     Show   : Boolean);
 
 end Ada_Widgets.Date_Picker.Implem;

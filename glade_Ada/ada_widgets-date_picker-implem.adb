@@ -36,10 +36,10 @@ with Gtk.Handlers;
 with Gtkada.Dialogs;             use Gtkada.Dialogs;
 with Gtk.Container.Additions;    use Gtk.Container.Additions;
 
+with Glib.Object;
 with Glib.Values;
-with Glib.Additions;             use Glib.Additions;
 with Glib.Properties;
-with Glib.Properties.Creation;   use Glib.Properties.Creation;
+with Glib.Properties.Creation;
 with Glib.Error;
 with Glib.Type_Conversion_Hooks;
 
@@ -51,7 +51,7 @@ package body Ada_Widgets.Date_Picker.Implem is
    package ICS renames Interfaces.C.Strings;
 
    package Picker_Handlers is new Gtk.Handlers.User_Callback
-     (Gtk.Button.Gtk_Button_Record, GObject);
+     (Gtk.Button.Gtk_Button_Record, Glib.Object.GObject);
 
    -------------------------------------------
    --  BUTTON AND ENTRY USER DATA           --
@@ -69,16 +69,17 @@ package body Ada_Widgets.Date_Picker.Implem is
    --  SET PROPERTY                         --
    -------------------------------------------
    procedure Set_Property (Object        : GObject_Ptr;
-                           Prop_Id       : Property_Id;
+                           Prop_Id       : Glib.Properties.Creation.Property_Id;
                            Value         : Glib.Values.GValue;
                            Property_Spec : Param_Spec);
    procedure Set_Property (Object        : GObject_Ptr;
-                           Prop_Id       : Property_Id;
+                           Prop_Id       : Glib.Properties.Creation.Property_Id;
                            Value         : Glib.Values.GValue;
                            Property_Spec : Param_Spec) is
       pragma Unreferenced (Property_Spec);
-      Stub : GObject_Record;
-      Ada_Object : constant Glib.Object.GObject := Get_User_Data (-Object, Stub);
+      Stub : Glib.Object.GObject_Record;
+      Ada_Object : constant Glib.Object.GObject :=
+                     Glib.Object.Get_User_Data (-Object, Stub);
    begin
       case Prop_Id is
          when PROP_MIN_DATE =>
@@ -88,7 +89,7 @@ package body Ada_Widgets.Date_Picker.Implem is
                Ada_Log ("ada_widgets.date_picker.implem.set_property: "
                         & "prop_id=" & Prop_To_String (Prop_Id)
                         & ", value=" & Str
-                        & ", object=" & Type_Name (Get_Type (Ada_Object))
+                        & ", object=" & Type_Name (Get_Type (Object))
                         & " (" & To_Hex (Object'Image) & ")");
 
                if Ada_Widgets.Date_Picker.Validation.Is_Valid_Format (Str) then
@@ -109,7 +110,7 @@ package body Ada_Widgets.Date_Picker.Implem is
                Ada_Log ("ada_widgets.date_picker.implem.set_property: "
                         & "prop_id=" & Prop_To_String (Prop_Id)
                         & ", value=" & Str
-                        & ", object=" & Type_Name (Get_Type (Ada_Object))
+                        & ", object=" & Type_Name (Get_Type (Object))
                         & " (" & To_Hex (Object'Image) & ")");
 
                if Ada_Widgets.Date_Picker.Validation.Is_Valid_Format (Str) then
@@ -133,16 +134,17 @@ package body Ada_Widgets.Date_Picker.Implem is
    --  GET PROPERTY                         --
    -------------------------------------------
    procedure Get_Property (Object        : GObject_Ptr;
-                           Prop_Id       : Property_Id;
+                           Prop_Id       : Glib.Properties.Creation.Property_Id;
                            Value         : out Glib.Values.GValue;
                            Property_Spec : Param_Spec);
    procedure Get_Property (Object        : GObject_Ptr;
-                           Prop_Id       : Property_Id;
+                           Prop_Id       : Glib.Properties.Creation.Property_Id;
                            Value         : out Glib.Values.GValue;
                            Property_Spec : Param_Spec) is
       pragma Unreferenced (Property_Spec);
-      Stub : GObject_Record;
-      Ada_Object : constant Glib.Object.GObject := Get_User_Data (-Object, Stub);
+      Stub : Glib.Object.GObject_Record;
+      Ada_Object : constant Glib.Object.GObject :=
+                     Glib.Object.Get_User_Data (-Object, Stub);
    begin
       case Prop_Id is
          when PROP_MIN_DATE =>
@@ -155,7 +157,7 @@ package body Ada_Widgets.Date_Picker.Implem is
                Ada_Log ("ada_widgets.date_picker.implem.get_property: "
                         & "prop_id=" & Prop_To_String (Prop_Id)
                         & ", value=" & Str
-                        & ", object=" & Type_Name (Get_Type (Ada_Object))
+                        & ", object=" & Type_Name (Get_Type (Object))
                         & " (" & To_Hex (Object'Image) & ")");
 
               Glib.Values.Set_String (Value, Str);
@@ -171,7 +173,7 @@ package body Ada_Widgets.Date_Picker.Implem is
                Ada_Log ("ada_widgets.date_picker.implem.get_property: "
                         & "prop_id=" & Prop_To_String (Prop_Id)
                         & ", value=" & Str
-                        & ", object=" & Type_Name (Get_Type (Ada_Object))
+                        & ", object=" & Type_Name (Get_Type (Object))
                         & " (" & To_Hex (Object'Image) & ")");
 
                Glib.Values.Set_String (Value, Str);
@@ -194,10 +196,10 @@ package body Ada_Widgets.Date_Picker.Implem is
    -------------------------------------------
    Klass : Glib.GType := Glib.GType_None;
 
-   procedure Class_Init (Self : GObject_Class);
+   procedure Class_Init (Self : Glib.Object.GObject_Class);
    pragma Convention (C, Class_Init);
 
-   procedure Class_Init (Self : GObject_Class) is
+   procedure Class_Init (Self : Glib.Object.GObject_Class) is
       Class_Ptr : constant GObject_Class_Ptr := -Self;
    begin
       Ada_Log ("ada_widgets.date_picker.implem.class_init: "
@@ -207,20 +209,20 @@ package body Ada_Widgets.Date_Picker.Implem is
       Class_Ptr.Set_Property := Set_Property'Access;
       Class_Ptr.Get_Property := Get_Property'Access;
 
-      Install_Property
+      Glib.Properties.Creation.Install_Property
         (Class_Record  => Self,
          Prop_Id       => PROP_MIN_DATE,
-         Property_Spec => Gnew_String
+         Property_Spec => Glib.Properties.Creation.Gnew_String
              (Name    => "min-date",
               Nick    => "Min Date",
               Blurb   => "Minimum allowed date",
               Default => "1901-01-01",
               Flags   => Param_Readable or Param_Writable));
 
-      Install_Property
+      Glib.Properties.Creation.Install_Property
         (Class_Record  => Self,
          Prop_Id       => PROP_MAX_DATE,
-         Property_Spec => Gnew_String
+         Property_Spec => Glib.Properties.Creation.Gnew_String
            (Name    => "max-date",
             Nick    => "Max Date",
             Blurb   => "Maximum allowed date",
@@ -229,19 +231,21 @@ package body Ada_Widgets.Date_Picker.Implem is
 
       declare
          Prop_List : constant Glib.Param_Spec_Array
-           := Class_List_Properties (Self);
+           := Glib.Object.Class_List_Properties (Self);
          Found : Boolean := False;
       begin
          if Prop_List'Length = 0 then
             Ada_Log ("ada_widgets.date_picker.implem.class_init: no properties");
          else
             for I in Prop_List'Range loop
-               if Owner_Type (Prop_List (I)) = Class_Ptr.Type_Class.G_Type then
+               if Glib.Properties.Creation.Owner_Type (Prop_List (I)) =
+                 Class_Ptr.Type_Class.G_Type
+               then
                   if not Found then
                      Found := True;
                      Ada_Log ("ada_widgets.date_picker.implem.class_init: own properties:");
                   end if;
-                  Ada_Log (Blanks & Pspec_Name (Prop_List (I)));
+                  Ada_Log (Blanks & Glib.Properties.Creation.Pspec_Name (Prop_List (I)));
                end if;
             end loop;
             if not Found then
@@ -255,21 +259,20 @@ package body Ada_Widgets.Date_Picker.Implem is
    --  INSTANCE INIT                        --
    -------------------------------------------
    procedure Instance_Init (Object : GObject_Ptr;
-                            GClass : GObject_Class);
+                            GClass : Glib.Object.GObject_Class);
    pragma Convention (C, Instance_Init);
 
    procedure Instance_Init (Object : GObject_Ptr;
-                            GClass : GObject_Class) is
+                            GClass : Glib.Object.GObject_Class) is
       Class_Ptr : constant GObject_Class_Ptr := -GClass;
-      Stub : GObject_Record;
    begin
       Ada_Log ("ada_widgets.date_picker.implem.instance_init: "
-               & "object=" & Type_Name (Get_Type (Get_User_Data (-Object, Stub)))
+               & "object=" & Type_Name (Get_Type (Object))
                & "(" & To_Hex (Object'Image) & ")"
                & ", class=" & Type_Name (Class_Ptr.Type_Class.G_Type)
                & " (" & To_Hex (Class_Ptr'Image) & ")");
 
-      Build (Object => Get_User_Data (-Object, Stub),
+      Build (Object => Object,
              Show   => True);
    end Instance_Init;
 
@@ -320,10 +323,10 @@ package body Ada_Widgets.Date_Picker.Implem is
    -----------------------------------
    procedure On_Calendar_Button_Clicked
      (Some_Button : access Gtk.Button.Gtk_Button_Record'Class;
-      User_Data   : GObject);
+      User_Data   : Glib.Object.GObject);
    procedure On_Calendar_Button_Clicked
      (Some_Button : access Gtk.Button.Gtk_Button_Record'Class;
-      User_Data   : GObject)
+      User_Data   : Glib.Object.GObject)
    is
       pragma Unreferenced (Some_Button, User_Data);
       Response : Message_Dialog_Buttons;
@@ -399,7 +402,7 @@ package body Ada_Widgets.Date_Picker.Implem is
    -------------------------------------------
    --  BUILD                                --
    -------------------------------------------
-   procedure Build (Object : not null access Glib.Object.GObject_Record'Class;
+   procedure Build (Object : not null GObject_Ptr;
                     Show   : Boolean) is
       Cal_Icon     : Gtk.Image.Gtk_Image;
       Context      : Gtk.Style_Context.Gtk_Style_Context;
@@ -411,16 +414,19 @@ package body Ada_Widgets.Date_Picker.Implem is
       The_Button   : Gtk_Button;
       Child        : Gtk_Widget;
       Now          : Ada.Calendar.Time;
+      Stub         : Glib.Object.GObject_Record;
+      Ada_Object   : constant Glib.Object.GObject :=
+                       Glib.Object.Get_User_Data (-Object, Stub);
    begin
       Ada_Log ("ada_widgets.date_picker.implem.build: "
                & "object=" & Type_Name (Get_Type (Object))
-               & " (" & To_Hex (Glib.Object.Get_Object (Object)'Image) & ")");
+               & " (" & To_Hex (Object'Image) & ")");
 
       -- 0. Get current date/time
       Now := Ada.Calendar.Clock;
 
       --  1. Cast the object to a Gtk Frame
-      Widget := Gtk_Frame (Object);
+      Widget := Gtk_Frame (Ada_Object);
 
       --  2. Initialize the widget Gtk_Frame
       Widget.Set_Shadow_Type (Gtk.Enums.Shadow_None);
@@ -433,7 +439,7 @@ package body Ada_Widgets.Date_Picker.Implem is
          HBox := Gtk_Box (Child);
       else
          if Child /= null then
-            Gtk_Container (Object).Remove (Child);
+            Gtk_Container (Ada_Object).Remove (Child);
          end if;
          Gtk.Box.Gtk_New (HBox, Gtk.Enums.Orientation_Horizontal, 0);
          HBox.Set_Name ("Date_Picker_HBox");
@@ -505,16 +511,16 @@ package body Ada_Widgets.Date_Picker.Implem is
 
       --  10. Connect the signal to the button
       Picker_Handlers.Connect
-        (The_Button,
-         "clicked",
-         Picker_Handlers.To_Marshaller (On_Calendar_Button_Clicked'Access),
-         GObject (Object));
+        (Widget    => The_Button,
+         Name      => "clicked",
+         Marsh     => Picker_Handlers.To_Marshaller (On_Calendar_Button_Clicked'Access),
+         User_Data => Ada_Object);
 
       --  11. Set data
-      Button_User_Data.Set (Object, The_Button,  "ada-picker-button-ref");
-      Entry_User_Data.Set  (Object, Year_Entry,  "ada-picker-year-ref");
-      Entry_User_Data.Set  (Object, Month_Entry, "ada-picker-month-ref");
-      Entry_User_Data.Set  (Object, Day_Entry,   "ada-picker-day-ref");
+      Button_User_Data.Set (Ada_Object, The_Button,  "ada-picker-button-ref");
+      Entry_User_Data.Set  (Ada_Object, Year_Entry,  "ada-picker-year-ref");
+      Entry_User_Data.Set  (Ada_Object, Month_Entry, "ada-picker-month-ref");
+      Entry_User_Data.Set  (Ada_Object, Day_Entry,   "ada-picker-day-ref");
 
       --  12. Change sensitiveness
       Year_Entry.Set_Sensitive (False);

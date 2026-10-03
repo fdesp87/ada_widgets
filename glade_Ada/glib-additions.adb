@@ -17,5 +17,14 @@
 
 package body Glib.Additions is
 
+   function Get_Type (Object : GObject_Ptr) return Glib.GType is
+      use GObject_Conversions;
+   begin
+      if Object = null then
+         return Glib.GType_None;
+      else
+         return Object.G_Type_Instance.G_Class.G_Type;
+      end if;
+   end Get_Type;
 
 end Glib.Additions;

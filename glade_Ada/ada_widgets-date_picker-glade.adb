@@ -16,11 +16,13 @@
 --  LICENSE.GLP and LICENSE.LGPL. If not, see <http:--www.gnu.org-licenses-> --                              --
 -------------------------------------------------------------------------------
 with Glade_Binding.Widget;
-with Interfaces.C.Strings;           use Interfaces.C.Strings;
-with Glib.Object;                    use Glib.Object;
+with Interfaces.C.Strings;
+
 with Ada_Widgets.Date_Picker.Implem;
 
 package body Ada_Widgets.Date_Picker.Glade is
+
+   package ICS renames Interfaces.C.Strings;
 
    -------------------------------------------
    --  GET TYPE                             --
@@ -37,19 +39,18 @@ package body Ada_Widgets.Date_Picker.Glade is
    procedure Post_Create (Adtor   : Adaptor;
                           Object  : GObject_Ptr;
                           Reason  : Glade_Create_Reason) is
-      Stub : GObject_Record;
    begin
       Ada_Log ("ada_widgets.date_picker.glade.post_create: " & ASCII.LF
-               & Blanks & "adaptor=" & Value (Get_Name (Adtor))
+               & Blanks & "adaptor=" & ICS.Value (Get_Name (Adtor))
                & " (" & To_Hex (Adtor'Image) & ")" & ASCII.LF
-               & Blanks & "object=" & Type_Name (Get_Type (Get_User_Data (-Object, Stub)))
+               & Blanks & "object=" & Type_Name (Get_Type (Object))
                & " (" & To_Hex (Object'Image) & ")" & ASCII.LF
                & Blanks & "reason=" & Reason'Image);
 
       if Reason = Glade_Create_Load or Reason = Glade_Create_User or Reason = Glade_Create_Copy
       then
          Glade_Binding.Widget.Push_Superuser;
-         Ada_Widgets.Date_Picker.Implem.Build (Object => Get_User_Data (-Object, Stub),
+         Ada_Widgets.Date_Picker.Implem.Build (Object => Object,
                                                Show   => False);
          Glade_Binding.Widget.Pop_Superuser;
       end if;

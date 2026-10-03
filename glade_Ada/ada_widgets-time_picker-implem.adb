@@ -36,11 +36,11 @@ with Gdk.Pixbuf;                 use Gdk.Pixbuf;
 with Gtk.Container.Additions;    use Gtk.Container.Additions;
 with Gtkada.Types;
 
+with Glib.Object;
 with Glib.Values;
-with Glib.Additions;             use Glib.Additions;
 with Glib.Properties;
-with Glib.Properties.Creation;   use Glib.Properties.Creation;
-with Glib.Generic_Properties;    use Glib.Generic_Properties;
+with Glib.Properties.Creation;
+with Glib.Generic_Properties;
 with Glib.Error;
 with Glib.Type_Conversion_Hooks;
 
@@ -60,7 +60,7 @@ package body Ada_Widgets.Time_Picker.Implem is
    -------------------------------------------
    --  ENTRY USER DATA                      --
    -------------------------------------------
-   package Entry_User_Data is new Glib.Object.User_Data (Gtk_Entry);
+   package Entry_User_Data is new Glib.Object.User_Data (Data_Type => Gtk_Entry);
 
    -------------------------------------------
    --  TIME USER DATA                       --
@@ -71,16 +71,17 @@ package body Ada_Widgets.Time_Picker.Implem is
    --  SET PROPERTY                         --
    -------------------------------------------
    procedure Set_Property (Object        : GObject_Ptr;
-                           Prop_Id       : Property_Id;
+                           Prop_Id       : Glib.Properties.Creation.Property_Id;
                            Value         : Glib.Values.GValue;
                            Property_Spec : Param_Spec);
    procedure Set_Property (Object        : GObject_Ptr;
-                           Prop_Id       : Property_Id;
+                           Prop_Id       : Glib.Properties.Creation.Property_Id;
                            Value         : Glib.Values.GValue;
                            Property_Spec : Param_Spec) is
       pragma Unreferenced (Property_Spec);
-      Stub : GObject_Record;
-      Ada_Object : constant Glib.Object.GObject := Get_User_Data (-Object, Stub);
+      Stub :Glib.Object. GObject_Record;
+      Ada_Object : constant Glib.Object.GObject :=
+                     Glib.Object.Get_User_Data (-Object, Stub);
    begin
 
       case Prop_Id is
@@ -92,7 +93,7 @@ package body Ada_Widgets.Time_Picker.Implem is
                Ada_Log ("ada_widgets.time_picker.implem.set_property: "
                         & "prop_id=" & Prop_To_String (Prop_Id)
                         & ", value=" & Time_Zone'Image (TZ)
-                        & ", object=" & Type_Name (Get_Type (Ada_Object))
+                        & ", object=" & Type_Name (Get_Type (Object))
                         & " (" & To_Hex (Object'Image) & ")");
 
                Time_User_Data.Set (Object => Ada_Object,
@@ -108,16 +109,17 @@ package body Ada_Widgets.Time_Picker.Implem is
    --  GET PROPERTY                         --
    -------------------------------------------
    procedure Get_Property (Object        : GObject_Ptr;
-                           Prop_Id       : Property_Id;
+                           Prop_Id       : Glib.Properties.Creation.Property_Id;
                            Value         : out Glib.Values.GValue;
                            Property_Spec : Param_Spec);
    procedure Get_Property (Object        : GObject_Ptr;
-                           Prop_Id       : Property_Id;
+                           Prop_Id       : Glib.Properties.Creation.Property_Id;
                            Value         : out Glib.Values.GValue;
                            Property_Spec : Param_Spec) is
       pragma Unreferenced (Property_Spec);
-      Stub : GObject_Record;
-      Ada_Object : constant Glib.Object.GObject := Get_User_Data (-Object, Stub);
+      Stub : Glib.Object.GObject_Record;
+      Ada_Object : constant Glib.Object.GObject :=
+                     Glib.Object.Get_User_Data (-Object, Stub);
    begin
       Ada_Log ("ada_widgets.time_picker.implem.get_property");
 
@@ -132,7 +134,7 @@ package body Ada_Widgets.Time_Picker.Implem is
                Ada_Log ("ada_widgets.time_picker.implem.get_property: "
                         & "prop_id=" & Prop_To_String (Prop_Id)
                         & ", value=" & Time_Zone'Image (TZ)
-                        & ", object=" & Type_Name (Get_Type (Ada_Object))
+                        & ", object=" & Type_Name (Get_Type (Object))
                         & " (" & To_Hex (Object'Image) & ")");
 
                Time_Zone_Properties.Set_Enum (Value, TZ);
@@ -171,10 +173,10 @@ package body Ada_Widgets.Time_Picker.Implem is
    -------------------------------------------
    Klass : Glib.GType := Glib.GType_None;
 
-   procedure Class_Init (Self : GObject_Class);
+   procedure Class_Init (Self : Glib.Object.GObject_Class);
    pragma Convention (C, Class_Init);
 
-   procedure Class_Init (Self : GObject_Class) is
+   procedure Class_Init (Self : Glib.Object.GObject_Class) is
       Class_Ptr : constant GObject_Class_Ptr := -Self;
    begin
       Ada_Log ("ada_widgets.time_picker.implem.class_init: "
@@ -184,7 +186,7 @@ package body Ada_Widgets.Time_Picker.Implem is
       Class_Ptr.Set_Property := Set_Property'Access;
       Class_Ptr.Get_Property := Get_Property'Access;
 
-      Install_Property
+      Glib.Properties.Creation.Install_Property
         (Class_Record  => Self,
          Prop_Id       => PROP_TIME_ZONE,
          Property_Spec => Time_Zone_Properties.Gnew_Enum
@@ -195,19 +197,22 @@ package body Ada_Widgets.Time_Picker.Implem is
             Flags     => Param_Readable or Param_Writable));
 
       declare
-         Prop_List : constant Glib.Param_Spec_Array := Class_List_Properties (Self);
+         Prop_List : constant Glib.Param_Spec_Array :=
+                       Glib.Object.Class_List_Properties (Self);
          Found : Boolean := False;
       begin
          if Prop_List'Length = 0 then
             Ada_Log ("ada_widgets.date_picker.implem.class_init: no properties");
          else
             for I in Prop_List'Range loop
-               if Owner_Type (Prop_List (I)) = Class_Ptr.Type_Class.G_Type then
+               if Glib.Properties.Creation.Owner_Type (Prop_List (I)) =
+                 Class_Ptr.Type_Class.G_Type
+               then
                   if not Found then
                      Found := True;
                      Ada_Log ("ada_widgets.date_picker.implem.class_init: own properties:");
                   end if;
-                  Ada_Log (Blanks & Pspec_Name (Prop_List (I)));
+                  Ada_Log (Blanks & Glib.Properties.Creation.Pspec_Name (Prop_List (I)));
                end if;
             end loop;
             if not Found then
@@ -221,20 +226,19 @@ package body Ada_Widgets.Time_Picker.Implem is
    --  INSTANCE INIT                        --
    -------------------------------------------
    procedure Instance_Init (Object : GObject_Ptr;
-                            GClass : GObject_Class);
+                            GClass : Glib.Object.GObject_Class);
    pragma Convention (C, Instance_Init);
    procedure Instance_Init (Object : GObject_Ptr;
-                            GClass : GObject_Class) is
+                            GClass : Glib.Object.GObject_Class) is
       Class_Ptr : constant GObject_Class_Ptr := -GClass;
-      Stub : GObject_Record;
    begin
       Ada_Log ("ada_widgets.time_picker.implem.time_picker_instance_init: "
-               & "object=" & Type_Name (Get_Type (Get_User_Data (-Object, Stub)))
+               & "object=" & Type_Name (Get_Type (Object))
                & "(" & To_Hex (Object'Image) & ")"
                & ", class=" & Type_Name (Class_Ptr.Type_Class.G_Type)
                & " (" & To_Hex (Class_Ptr'Image) & ")");
 
-      Build (Object => Get_User_Data (-Object, Stub),
+      Build (Object => Object,
              Show   => True);
    end Instance_Init;
 
@@ -251,7 +255,6 @@ package body Ada_Widgets.Time_Picker.Implem is
          G_Type_Query (Gtk.Frame.Get_Type, Parent_Query'Access);
          Type_Info :=
            (Class_Size      => IC.unsigned_short (Parent_Query.Class_Size),
-            --  Filler1         => (others => 0),
             Base_Init       => null,
             Base_Finalize   => null,
             Class_Init      => Class_Init'Access,
@@ -384,7 +387,7 @@ package body Ada_Widgets.Time_Picker.Implem is
    -------------------------------------------
    --  BUILD                                --
    -------------------------------------------
-   procedure Build (Object : not null access Glib.Object.GObject_Record'Class;
+   procedure Build (Object : not null GObject_Ptr;
                     Show   : Boolean) is
 
       Img_H       : Gtk.Image.Gtk_Image;
@@ -401,17 +404,20 @@ package body Ada_Widgets.Time_Picker.Implem is
       Sec_Button  : Gtk_Button;
       Child       : Gtk_Widget;
       Now         : Ada.Calendar.Time;
+      Stub        : Glib.Object.GObject_Record;
+      Ada_Object  : constant Glib.Object.GObject :=
+                      Glib.Object.Get_User_Data (-Object, Stub);
    begin
 
       Ada_Log ("ada_widgets.time_picker.implem.build: "
                & "object=" & Type_Name (Get_Type (Object))
-               & " (" & To_Hex (Glib.Object.Get_Object (Object)'Image) & ")");
+               & " (" & To_Hex (Object'Image) & ")");
 
       -- 0. Get current date/time
       Now := Ada.Calendar.Clock;
 
       --  1. Cast the object to a Gtk Frame
-      Widget := Gtk_Frame (Object);
+      Widget := Gtk_Frame (Ada_Object);
 
       --  2. Initialize the widget Gtk_Frame
       Widget.Set_Shadow_Type (Gtk.Enums.Shadow_None);
@@ -424,7 +430,7 @@ package body Ada_Widgets.Time_Picker.Implem is
          HBox := Gtk_Box (Child);
       else
          if Child /= null then
-            Gtk_Container (Object).Remove (Child);
+            Gtk_Container (Ada_Object).Remove (Child);
          end if;
          Gtk.Box.Gtk_New (HBox, Gtk.Enums.Orientation_Horizontal, 0);
          HBox.Set_Name ("Time_Picker_HBox");
@@ -510,9 +516,9 @@ package body Ada_Widgets.Time_Picker.Implem is
                        Padding => 0);
 
       --  9. Set data
-      Entry_User_Data.Set (Object, Hour_Entry, "ada-time-hour-ref");
-      Entry_User_Data.Set (Object, Min_Entry,  "ada-time-min-ref");
-      Entry_User_Data.Set (Object, Sec_Entry,  "ada-time-sec-ref");
+      Entry_User_Data.Set (Ada_Object, Hour_Entry, "ada-time-hour-ref");
+      Entry_User_Data.Set (Ada_Object, Min_Entry,  "ada-time-min-ref");
+      Entry_User_Data.Set (Ada_Object, Sec_Entry,  "ada-time-sec-ref");
 
       --  10. Change sensitiveness
       Hour_Entry.Set_Sensitive (False);

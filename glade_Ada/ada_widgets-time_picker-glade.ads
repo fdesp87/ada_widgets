@@ -18,7 +18,6 @@
 with Glib;                         use Glib;
 with Glib.Additions;               use Glib.Additions;
 
-
 with Glade_Binding;                use Glade_Binding;
 with Glade_Binding.Widget_Adaptor; use Glade_Binding.Widget_Adaptor;
 
